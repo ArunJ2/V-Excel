@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  password_hash     String
+  name              String?
+  role              String    // 'admin', 'staff', 'parent'
+  linked_student_id Int?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  
+  uploads           Document[]
+  record_versions   RecordVersion[]
+}
+
+model Student {
+  id                Int       @id @default(autoincrement())
+  ipp_number        String    @unique
+  name              String
+  dob               DateTime
+  gender            String?
+  address           String?
+  parent_names      String?
+  parent_contact    String?
+  disability_type   String?
+  disability_detail String?   // New: Specific details
+  clinical_case_no  String?   // New: Unique case identifier
+  therapist_assigned String?   // New: Assigned therapist name
+  referral_doctor   String?
+  active_status     Boolean   @default(true)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  documents         Document[]
+  clinical_history  ClinicalHistory?
+  milestones        DevelopmentalMilestones?
+  adl               DailyLivingSkills?
+  observations      ClinicalObservations?
+}
+
+model Document {
+  id                Int       @id @default(autoincrement())
+  student           Student   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  student_id        Int
+  filename          String
+  file_path         String
+  type              String    // 'screening', 'monthly', 'quarterly', 'iep'
+  uploader          User      @relation(fields: [uploaded_by], references: [id])
+  uploaded_by       Int
+  status            String    @default("pending") // 'pending', 'processed', 'error'
+  extracted_data    String?   // JSON string in SQLite
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+}
+
+model RecordVersion {
+  id                Int       @id @default(autoincrement())
+  entity_type       String    // 'clinical_history', 'milestones', etc.
+  entity_id         Int
+  version_number    Int
+  data              String    // JSON string
+  changed_by_user   User      @relation(fields: [changed_by], references: [id])
+  changed_by        Int
+  change_reason     String?
+  created_at        DateTime  @default(now())
+}
+
+model ClinicalHistory {
+  id                    Int       @id @default(autoincrement())
+  student               Student   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  student_id            Int       @unique
+  siblings_details      String?
+  family_structure      String?
+  home_language         String?
+  consanguinity         Boolean   @default(false)
+  pregnancy_duration    String?
+  delivery_nature       String?
+  birth_weight          String?
+  birth_cry             String?
+  history_seizures      Boolean   @default(false)
+  history_respiratory   Boolean   @default(false)
+  current_medications   String?
+  allergies             String?
+  age_disability_noticed String?
+  updated_at            DateTime  @updatedAt
+}
+
+model DevelopmentalMilestones {
+  id                Int       @id @default(autoincrement())
+  student           Student   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  student_id        Int       @unique
+  social_smile      String?
+  neck_control      String?
+  sitting           String?
+  crawling          String?
+  standing          String?
+  walking           String?
+  speech_initiation String?
+  updated_at        DateTime  @updatedAt
+}
+
+model DailyLivingSkills {
+  id                Int       @id @default(autoincrement())
+  student           Student   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  student_id        Int       @unique
+  eating            String?
+  dressing          String?
+  toileting         String?
+  updated_at        DateTime  @updatedAt
+}
+
+model ClinicalObservations {
+  id                      Int       @id @default(autoincrement())
+  student                 Student   @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  student_id              Int       @unique
+  general_appearance      String?
+  psychomotor_skills      String?
+  sensory_issues          String?
+  cognition_memory        String?
+  communication_expressive String?
+  communication_receptive  String?
+  social_interaction      String?
+  updated_at              DateTime  @updatedAt
+}

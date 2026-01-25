@@ -1,0 +1,20 @@
+{
+    "system": "Vexcel Student Portal Backend",
+    "version": "1.2.0",
+    "status": "Online",
+    "verification_links": {
+        "auth_users": "/api/auth/users",
+        "all_students": "/api/students",
+        "all_documents": "/api/documents/all",
+        "system_info": "/api-info"
+    },
+    "database": {
+        "type": "SQLite",
+        "file": "dev.db",
+        "persistence": "Robust/Standard"
+    },
+    "security": {
+        "auth_type": "JWT",
+        "cookie_mode": "httpOnly (Secure)"
+    }
+}

@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { login, register, getAllUsers, updateUser, deleteUser } from '../controllers/authController.js';
+import { authenticate, authorize } from '../middleware/authMiddleware.js';
+
+const router = Router();
+
+router.post('/login', login);
+router.post('/register', authenticate, authorize(['admin']), register);
+router.get('/users', authenticate, authorize(['admin']), getAllUsers);
+router.put('/users/:id', authenticate, authorize(['admin']), updateUser);
+router.delete('/users/:id', authenticate, authorize(['admin']), deleteUser);
+
+export default router;

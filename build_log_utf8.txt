@@ -1,0 +1,74 @@
+﻿
+> vexcel-dashboard@0.1.0 build
+> next build
+
+node.exe : 
+At C:\Program Files\n
+odejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (:String   
+ ) [], RemoteExce    
+ption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+> Build error 
+occurred
+Error: Configuring 
+Next.js via 
+'next.config.ts' is 
+not supported. 
+Please replace the 
+file with 
+'next.config.js' or 
+'next.config.mjs'.
+    at loadConfig 
+(D:\Users\ADITHYA VIG
+NESH\Downloads\Vexcel
+ Dashboard\vexcel-por
+tal\node_modules\next
+\dist\server\config.j
+s:786:19)
+    at async 
+Span.traceAsyncFn 
+(D:\Users\ADITHYA VIG
+NESH\Downloads\Vexcel
+ Dashboard\vexcel-por
+tal\node_modules\next
+\dist\trace\trace.js:
+151:20)
+    at async 
+D:\Users\ADITHYA VIGN
+ESH\Downloads\Vexcel 
+Dashboard\vexcel-port
+al\node_modules\next\
+dist\build\index.js:3
+79:28
+    at async 
+Span.traceAsyncFn 
+(D:\Users\ADITHYA VIG
+NESH\Downloads\Vexcel
+ Dashboard\vexcel-por
+tal\node_modules\next
+\dist\trace\trace.js:
+151:20)
+    at async build 
+(D:\Users\ADITHYA VIG
+NESH\Downloads\Vexcel
+ Dashboard\vexcel-por
+tal\node_modules\next
+\dist\build\index.js:
+374:9)
+    at async main 
+(D:\Users\ADITHYA VIG
+NESH\Downloads\Vexcel
+ Dashboard\vexcel-por
+tal\node_modules\next
+\dist\bin\next:155:5)

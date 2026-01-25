@@ -1,0 +1,142 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  staff
+  parent
+}
+
+enum MilestoneStatus {
+  Normal
+  Delayed
+  In_Progress
+}
+
+enum ADLStatus {
+  Independent
+  Dependent
+  In_Progress
+}
+
+enum ReportType {
+  Monthly
+  Quarterly
+  Screening
+}
+
+enum ReportStatus {
+  Draft
+  Approved
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  role              Role
+  linked_student_id Int?
+  student           Student? @relation(fields: [linked_student_id], references: [id])
+}
+
+model Student {
+  id               Int      @id @default(autoincrement())
+  ipp_number       String   @unique
+  name             String
+  dob              DateTime
+  blood_group      String?
+  gender           String
+  address          String?
+  parent_names     String
+  parent_contact   String
+  disability_type  String?
+  referral_doctor  String?
+  active_status    Boolean @default(true)
+
+  // Relations
+  users                   User[]
+  clinical_history        Clinical_History?
+  developmental_milestones Developmental_Milestones?
+  daily_living_skills     Daily_Living_Skills?
+  clinical_observations   Clinical_Observations?
+  reports                 Report[]
+}
+
+model Clinical_History {
+  id                    Int      @id @default(autoincrement())
+  student_id            Int      @unique
+  student               Student  @relation(fields: [student_id], references: [id])
+  
+  // Family
+  siblings_details      String?
+  family_structure      String? // nuclear/joint
+  home_language         String?
+  consanguinity         Boolean @default(false)
+  
+  // Birth
+  pregnancy_duration    String? // full term/premature
+  delivery_nature       String? // normal/c-section
+  birth_weight          String?
+  birth_cry             String? // immediate/delayed
+  
+  // Medical
+  history_seizures      Boolean @default(false)
+  history_respiratory   Boolean @default(false)
+  current_medications   String?
+  allergies             String?
+  age_disability_noticed String?
+}
+
+model Developmental_Milestones {
+  id                Int      @id @default(autoincrement())
+  student_id        Int      @unique
+  student           Student  @relation(fields: [student_id], references: [id])
+  
+  social_smile      MilestoneStatus?
+  neck_control      MilestoneStatus?
+  sitting           MilestoneStatus?
+  crawling          MilestoneStatus?
+  standing          MilestoneStatus?
+  walking           MilestoneStatus?
+  speech_initiation MilestoneStatus?
+}
+
+model Daily_Living_Skills {
+  id         Int      @id @default(autoincrement())
+  student_id Int      @unique
+  student    Student  @relation(fields: [student_id], references: [id])
+  
+  eating     ADLStatus?
+  dressing   ADLStatus?
+  toileting  ADLStatus?
+}
+
+model Clinical_Observations {
+  id                       Int      @id @default(autoincrement())
+  student_id               Int      @unique
+  student                  Student  @relation(fields: [student_id], references: [id])
+  
+  general_appearance       String?
+  psychomotor_skills       String?
+  sensory_issues           String?
+  cognition_memory         String?
+  communication_expressive String?
+  communication_receptive  String?
+  social_interaction       String?
+}
+
+model Report {
+  id          Int          @id @default(autoincrement())
+  student_id  Int
+  student     Student      @relation(fields: [student_id], references: [id])
+  type        ReportType
+  summary_text String?
+  file_url    String?
+  created_by  Int // User ID of creator (Staff)
+  status      ReportStatus @default(Draft)
+  created_at  DateTime     @default(now())
+}
