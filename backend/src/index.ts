@@ -47,8 +47,13 @@ app.get('/api-info', (req, res) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Diagnostic Link: http://localhost:${PORT}/api-info`);
-});
+// Start server only if not running in Vercel (Vercel exports the app)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Diagnostic Link: http://localhost:${PORT}/api-info`);
+    });
+}
+
+// Export the Express API for Vercel
+export default app;
