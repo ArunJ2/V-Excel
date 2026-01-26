@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express from 'express';
 import cors from 'cors';
-import authRoutes from '../src/routes/authRoutes';
-import studentRoutes from '../src/routes/studentRoutes';
-import documentRoutes from '../src/routes/documentRoutes';
-import recordRoutes from '../src/routes/recordRoutes';
-import prisma from '../src/config/database';
+import authRoutes from '../src/routes/authRoutes.js';
+import studentRoutes from '../src/routes/studentRoutes.js';
+import documentRoutes from '../src/routes/documentRoutes.js';
+import recordRoutes from '../src/routes/recordRoutes.js';
+import prisma from '../src/config/database.js';
 
 const app = express();
 
