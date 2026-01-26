@@ -39,7 +39,7 @@ export const getStudentByIPP = async (req: Request, res: Response) => {
     const { ipp } = req.params;
     try {
         const student = await prisma.student.findUnique({
-            where: { ipp_number: ipp },
+            where: { ipp_number: ipp as string },
             include: {
                 clinical_history: true,
                 milestones: true,
