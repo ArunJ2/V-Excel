@@ -12,7 +12,19 @@ interface EditButtonProps {
     label?: string;
 }
 
-const sectionConfig = {
+type FieldConfig = {
+    name: string;
+    label: string;
+    type: 'text' | 'textarea' | 'select' | 'checkbox';
+    options?: string[];
+};
+
+type SectionConfig = {
+    title: string;
+    fields: FieldConfig[];
+};
+
+const sectionConfig: Record<string, SectionConfig> = {
     clinical_history: {
         title: 'Edit Family & Medical History',
         fields: [
