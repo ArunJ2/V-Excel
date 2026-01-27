@@ -1,7 +1,6 @@
 import { apiFetchServer } from "@/lib/api-server";
-import { FaFileLines, FaDownload, FaMagnifyingGlass } from "react-icons/fa6";
+import { FaFileLines, FaMagnifyingGlass } from "react-icons/fa6";
 import PageContainer from "@/components/PageContainer";
-import DownloadButton from "./DownloadButton";
 
 export default async function ReportsPage() {
     let reports: any[] = [];
@@ -46,7 +45,7 @@ export default async function ReportsPage() {
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 {reports.length === 0 ? (
                     <div className="p-8 text-center text-slate-500">
-                        No reports found. Upload documents to see them here.
+                        No reports found. Reports will appear here when documents are uploaded.
                     </div>
                 ) : (
                     <table className="w-full text-left text-sm">
@@ -56,7 +55,6 @@ export default async function ReportsPage() {
                                 <th className="px-6 py-4">Type</th>
                                 <th className="px-6 py-4">Uploaded Date</th>
                                 <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -86,9 +84,6 @@ export default async function ReportsPage() {
                                             {report.status.toUpperCase()}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <DownloadButton documentId={report.id} />
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -98,3 +93,4 @@ export default async function ReportsPage() {
         </PageContainer>
     );
 }
+

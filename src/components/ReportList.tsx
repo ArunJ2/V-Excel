@@ -1,4 +1,4 @@
-import { FaFilePdf, FaDownload, FaEye } from "react-icons/fa6";
+import { FaFilePdf } from "react-icons/fa6";
 
 interface Report {
     id: number;
@@ -13,6 +13,14 @@ interface ReportListProps {
 }
 
 export default function ReportList({ reports }: ReportListProps) {
+    if (reports.length === 0) {
+        return (
+            <div className="text-sm text-slate-400 text-center py-4">
+                No reports available yet.
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-3">
             {reports.map((report) => (
@@ -26,16 +34,12 @@ export default function ReportList({ reports }: ReportListProps) {
                             <p className="text-xs text-slate-500">{report.result ? `Result: ${report.result} • ` : ""}{report.date}</p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <button className="text-slate-400 hover:text-brand-600 p-2 rounded-lg hover:bg-brand-50 transition-colors" title="View">
-                            <FaEye />
-                        </button>
-                        <button className="text-slate-400 hover:text-brand-600 p-2 rounded-lg hover:bg-brand-50 transition-colors" title="Download">
-                            <FaDownload />
-                        </button>
-                    </div>
+                    <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                        {report.type}
+                    </span>
                 </div>
             ))}
         </div>
     );
 }
+

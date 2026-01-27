@@ -1,17 +1,15 @@
-import StudentHeader from "@/components/StudentHeader";
 import TabsContainer from "@/components/TabsContainer";
 import DataCard from "@/components/DataCard";
 import Accordion from "@/components/Accordion";
 import ReportList from "@/components/ReportList";
 import UploadReportForm from "@/components/UploadReportForm";
 import ProgressChart from "@/components/ProgressChart";
-import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaCircleCheck, FaCalendar, FaArrowUp } from "react-icons/fa6";
+import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile } from "react-icons/fa6";
 import { getStudentProfile, getStudentById, getStudentClinicalHistory, getDevelopmentalMilestones, getDailyLivingSkills, getClinicalObservations } from "@/actions/student-actions";
 import { getStudentReports } from "@/actions/report-actions";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import { cookies } from 'next/headers';
-import DashboardButtons from "@/components/DashboardButtons";
 import EditableSection from "@/components/EditableSection";
 import EditSectionButton from "@/components/EditSectionButton";
 
@@ -81,45 +79,65 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     // 1. Overview Content
     const OverviewContent = (
         <div className="space-y-6">
+            {/* Student Profile Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <DataCard title="Attendance" action={<span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded border border-green-100">Excellent</span>}>
-                    <div className="flex items-end gap-2">
-                        <span className="text-4xl font-bold text-slate-800">92%</span>
-                        <span className="text-sm text-slate-500 mb-1">Yearly</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-2 mt-4 rounded-full overflow-hidden">
-                        <div className="bg-green-500 h-full w-[92%]"></div>
-                    </div>
-                </DataCard>
-
-                <DataCard title="Next Screening" action={<div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-600"><FaCalendar /></div>}>
-                    <div className="flex items-end gap-2">
-                        <span className="text-3xl font-bold text-slate-800">14 Nov</span>
-                        <span className="text-sm text-slate-500 mb-1">2025</span>
-                    </div>
-                    <p className="text-xs text-brand-600 font-medium mt-3 bg-brand-50 inline-block px-2 py-1 rounded">25 Days remaining</p>
-                </DataCard>
-
-                <DataCard title="Active Services">
+                <DataCard title="Personal Information">
                     <div className="space-y-3">
-                        <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-100">
-                            <div>
-                                <span className="text-sm font-semibold text-slate-700 block">Occupational Therapy</span>
-                                <span className="text-[10px] text-slate-500">Since Jan 2024 (2 Sessions/wk)</span>
-                            </div>
-                            <FaCircleCheck className="text-green-500" />
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Date of Birth</span>
+                            <span className="text-sm font-semibold text-slate-700">{formattedDOB}</span>
                         </div>
-                        <div className="flex justify-between items-center p-2 bg-slate-50 rounded-lg border border-slate-100">
-                            <div>
-                                <span className="text-sm font-semibold text-slate-700 block">Speech Therapy</span>
-                                <span className="text-[10px] text-slate-500">Since Mar 2024 (1 Session/wk)</span>
-                            </div>
-                            <FaCircleCheck className="text-green-500" />
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Blood Group</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.blood_group || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Gender</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.gender || 'N/A'}</span>
+                        </div>
+                    </div>
+                </DataCard>
+
+                <DataCard title="Guardian Details">
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Parents</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.parent_names || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Contact</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.parent_contact || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Address</span>
+                            <span className="text-sm font-semibold text-slate-700 text-right max-w-[150px] truncate">{studentData.address || 'N/A'}</span>
+                        </div>
+                    </div>
+                </DataCard>
+
+                <DataCard title="Clinical Information" action={
+                    <span className={`text-xs font-bold px-2 py-1 rounded border ${studentData.active_status ? 'text-green-600 bg-green-50 border-green-100' : 'text-amber-600 bg-amber-50 border-amber-100'}`}>
+                        {studentData.active_status ? 'Active' : 'Inactive'}
+                    </span>
+                }>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Disability Type</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.disability_type || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Referral Doctor</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.referral_doctor || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Therapist</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.therapist_assigned || 'N/A'}</span>
                         </div>
                     </div>
                 </DataCard>
             </div>
 
+            {/* Progress Chart */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
@@ -127,21 +145,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                             <h3 className="text-lg font-bold text-slate-800">Learning Progress</h3>
                             <p className="text-xs text-slate-500">Monthly developmental tracking</p>
                         </div>
-                        <div className="flex items-center gap-1 text-green-600 text-sm font-bold bg-green-50 px-2 py-1 rounded">
-                            <FaArrowUp className="text-[10px]" /> 12%
-                        </div>
                     </div>
                     <ProgressChart title="Learning Progress" data={[40, 45, 42, 55, 60, 68]} />
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <h3 className="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Parental Areas of Concern</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed italic flex-grow">
-                        "Difficulty in communicating needs verbally. Shows restlessness during evening hours. Social interaction with peers is limited."
-                    </p>
-                    <button className="mt-4 w-full py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-lg border border-slate-100 hover:bg-slate-100 transition-colors">
-                        Add Note
-                    </button>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Quick Notes</h3>
+                    <div className="space-y-3">
+                        {studentData.disability_detail ? (
+                            <p className="text-sm text-slate-600 leading-relaxed">{studentData.disability_detail}</p>
+                        ) : (
+                            <p className="text-sm text-slate-400 italic">No additional notes available.</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -315,15 +331,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         </div>
     );
 
-    const actionBtns = (
-        <DashboardButtons studentId={studentData.id} />
-    );
-
     return (
         <PageContainer
             title={studentData.name}
             subtitle={`IPP Number: ${studentData.ipp_number}`}
-            action={actionBtns}
         >
             <div className="grid grid-cols-12 gap-6 pb-20">
                 <div className="col-span-12">
