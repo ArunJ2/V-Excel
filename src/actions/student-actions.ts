@@ -82,3 +82,15 @@ export async function getClinicalObservations(studentId: number) {
         return null;
     }
 }
+
+export async function updateStudentProfile(studentId: number, data: any) {
+    try {
+        await studentApi.update(studentId, data);
+        revalidatePath('/dashboard');
+        revalidatePath('/student-info');
+        return { success: true };
+    } catch (error) {
+        return { error: (error as Error).message };
+    }
+}
+

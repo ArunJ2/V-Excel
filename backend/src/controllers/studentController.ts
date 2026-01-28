@@ -59,7 +59,12 @@ export const getStudentByIPP = async (req: Request, res: Response) => {
 };
 
 export const createStudent = async (req: Request, res: Response) => {
-    const { ipp_number, name, dob, gender, address, parent_names, parent_contact, disability_type, disability_detail, clinical_case_no, therapist_assigned, referral_doctor } = req.body;
+    const {
+        ipp_number, name, dob, gender, blood_group, address,
+        parent_names, parent_contact, disability_type, disability_detail,
+        clinical_case_no, therapist_assigned, referral_doctor,
+        attendance, quick_notes
+    } = req.body;
     try {
         const student = await prisma.student.create({
             data: {
@@ -67,6 +72,7 @@ export const createStudent = async (req: Request, res: Response) => {
                 name,
                 dob: new Date(dob),
                 gender,
+                blood_group,
                 address,
                 parent_names,
                 parent_contact,
@@ -75,6 +81,8 @@ export const createStudent = async (req: Request, res: Response) => {
                 clinical_case_no,
                 therapist_assigned,
                 referral_doctor,
+                attendance: attendance ?? 100, // Default to 100 if not provided
+                quick_notes,
             }
         });
         res.status(201).json(student);

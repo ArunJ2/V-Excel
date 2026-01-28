@@ -12,6 +12,7 @@ import PageContainer from "@/components/PageContainer";
 import { cookies } from 'next/headers';
 import EditableSection from "@/components/EditableSection";
 import EditSectionButton from "@/components/EditSectionButton";
+import EditStudentProfileButton from "@/components/EditStudentProfileButton";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { id?: string } }) {
     // 1. Resolve Student ID based on Role
@@ -76,13 +77,63 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         active_status: studentData.active_status
     };
 
+    const userRole = user?.role || 'parent';
+
     // 1. Overview Content
     const OverviewContent = (
         <div className="space-y-6">
+            {/* Attendance Card - Full Width */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-800">Attendance</h3>
+                        <p className="text-xs text-slate-500">Current academic year</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold px-2 py-1 rounded border ${(studentData.attendance ?? 100) >= 75 ? 'text-green-600 bg-green-50 border-green-100' :
+                            (studentData.attendance ?? 100) >= 50 ? 'text-amber-600 bg-amber-50 border-amber-100' :
+                                'text-red-600 bg-red-50 border-red-100'
+                            }`}>
+                            {(studentData.attendance ?? 100) >= 75 ? 'Excellent' : (studentData.attendance ?? 100) >= 50 ? 'Average' : 'Low'}
+                        </span>
+                        <EditStudentProfileButton
+                            studentId={studentData.id}
+                            section="attendance"
+                            currentData={studentData}
+                            userRole={userRole}
+                        />
+                    </div>
+                </div>
+                <div className="flex items-end gap-4">
+                    <span className="text-5xl font-bold text-slate-800">{studentData.attendance ?? 100}%</span>
+                    <span className="text-sm text-slate-500 mb-2">Yearly Average</span>
+                </div>
+                <div className="w-full bg-slate-100 h-3 mt-4 rounded-full overflow-hidden">
+                    <div
+                        className={`h-full transition-all ${(studentData.attendance ?? 100) >= 75 ? 'bg-green-500' :
+                            (studentData.attendance ?? 100) >= 50 ? 'bg-amber-500' :
+                                'bg-red-500'
+                            }`}
+                        style={{ width: `${studentData.attendance ?? 100}%` }}
+                    ></div>
+                </div>
+            </div>
+
             {/* Student Profile Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <DataCard title="Personal Information">
+                <DataCard title="Personal Information" action={
+                    <EditStudentProfileButton
+                        studentId={studentData.id}
+                        section="personal_info"
+                        currentData={studentData}
+                        userRole={userRole}
+                    />
+                }>
                     <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Full Name</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.name}</span>
+                        </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Date of Birth</span>
                             <span className="text-sm font-semibold text-slate-700">{formattedDOB}</span>
@@ -98,7 +149,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                     </div>
                 </DataCard>
 
-                <DataCard title="Guardian Details">
+                <DataCard title="Guardian Details" action={
+                    <EditStudentProfileButton
+                        studentId={studentData.id}
+                        section="guardian_details"
+                        currentData={studentData}
+                        userRole={userRole}
+                    />
+                }>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Parents</span>
@@ -116,9 +174,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 </DataCard>
 
                 <DataCard title="Clinical Information" action={
-                    <span className={`text-xs font-bold px-2 py-1 rounded border ${studentData.active_status ? 'text-green-600 bg-green-50 border-green-100' : 'text-amber-600 bg-amber-50 border-amber-100'}`}>
-                        {studentData.active_status ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-bold px-2 py-1 rounded border ${studentData.active_status ? 'text-green-600 bg-green-50 border-green-100' : 'text-amber-600 bg-amber-50 border-amber-100'}`}>
+                            {studentData.active_status ? 'Active' : 'Inactive'}
+                        </span>
+                        <EditStudentProfileButton
+                            studentId={studentData.id}
+                            section="clinical_info"
+                            currentData={studentData}
+                            userRole={userRole}
+                        />
+                    </div>
                 }>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
@@ -137,7 +203,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 </DataCard>
             </div>
 
-            {/* Progress Chart */}
+            {/* Progress Chart & Quick Notes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
@@ -150,18 +216,29 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Quick Notes</h3>
+                    <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                        <h3 className="text-sm font-bold text-slate-800">Quick Notes</h3>
+                        <EditStudentProfileButton
+                            studentId={studentData.id}
+                            section="quick_notes"
+                            currentData={studentData}
+                            userRole={userRole}
+                        />
+                    </div>
                     <div className="space-y-3">
-                        {studentData.disability_detail ? (
-                            <p className="text-sm text-slate-600 leading-relaxed">{studentData.disability_detail}</p>
+                        {studentData.quick_notes || studentData.disability_detail ? (
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                {studentData.quick_notes || studentData.disability_detail}
+                            </p>
                         ) : (
-                            <p className="text-sm text-slate-400 italic">No additional notes available.</p>
+                            <p className="text-sm text-slate-400 italic">No notes available. Click edit to add notes.</p>
                         )}
                     </div>
                 </div>
             </div>
         </div>
     );
+
 
     // 2. Fetch All Data in Parallel
     const [historyData, milestonesData, adlData, observationsData, reportsData] = await Promise.all([
@@ -347,6 +424,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                     />
                 </div>
             </div>
-        </PageContainer>
+        </PageContainer >
     );
 }

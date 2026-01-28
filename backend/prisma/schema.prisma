@@ -27,14 +27,17 @@ model Student {
   name              String
   dob               DateTime
   gender            String?
+  blood_group       String?
   address           String?
   parent_names      String?
   parent_contact    String?
   disability_type   String?
-  disability_detail String?   // New: Specific details
-  clinical_case_no  String?   // New: Unique case identifier
-  therapist_assigned String?   // New: Assigned therapist name
+  disability_detail String?   // Specific details about disability
+  clinical_case_no  String?   // Unique case identifier
+  therapist_assigned String?  // Assigned therapist name
   referral_doctor   String?
+  attendance        Int       @default(100) // Attendance percentage (0-100)
+  quick_notes       String?   // Additional notes about the student
   active_status     Boolean   @default(true)
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
