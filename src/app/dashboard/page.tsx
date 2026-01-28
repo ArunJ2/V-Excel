@@ -4,7 +4,7 @@ import Accordion from "@/components/Accordion";
 import ReportList from "@/components/ReportList";
 import UploadReportForm from "@/components/UploadReportForm";
 import ProgressChart from "@/components/ProgressChart";
-import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile } from "react-icons/fa6";
+import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines } from "react-icons/fa6";
 import { getStudentProfile, getStudentById, getStudentClinicalHistory, getDevelopmentalMilestones, getDailyLivingSkills, getClinicalObservations } from "@/actions/student-actions";
 import { getStudentReports } from "@/actions/report-actions";
 import { notFound } from "next/navigation";
@@ -412,6 +412,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         <PageContainer
             title={studentData.name}
             subtitle={`IPP Number: ${studentData.ipp_number}`}
+            action={
+                <a
+                    href={`/reports/generate?id=${studentData.id}`}
+                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+                >
+                    <FaFileLines className="text-sm" />
+                    Generate Report
+                </a>
+            }
         >
             <div className="grid grid-cols-12 gap-6 pb-20">
                 <div className="col-span-12">
