@@ -181,8 +181,8 @@ export default function StudentReportView({
             </div>
 
             {/* Report Content */}
-            <div ref={reportRef} className="max-w-[1200px] mx-auto p-6 print:p-0 print:max-w-none">
-                <div className="bg-white rounded-2xl shadow-xl print:shadow-none print:rounded-none overflow-hidden">
+            <div ref={reportRef} className="max-w-[1200px] mx-auto p-6 print:p-0 print:max-w-none print:w-full print:m-0 print:overflow-visible">
+                <div className="bg-white rounded-2xl shadow-xl print:shadow-none print:rounded-none overflow-hidden print:overflow-visible print:w-full">
 
                     {/* Header */}
                     <div className="bg-gradient-to-r from-brand-600 to-brand-700 text-white p-8 print:p-6">
@@ -357,8 +357,8 @@ export default function StudentReportView({
                                     <div key={idx} className="p-3 bg-slate-50 rounded-lg">
                                         <p className="text-[10px] font-bold text-slate-400 uppercase">{item.label}</p>
                                         <span className={`inline-block mt-1 text-xs font-bold px-2 py-0.5 rounded ${item.value === 'Normal' ? 'bg-green-100 text-green-700' :
-                                                item.value === 'Delayed' ? 'bg-amber-100 text-amber-700' :
-                                                    'bg-slate-100 text-slate-500'
+                                            item.value === 'Delayed' ? 'bg-amber-100 text-amber-700' :
+                                                'bg-slate-100 text-slate-500'
                                             }`}>
                                             {item.value || 'N/A'}
                                         </span>
@@ -411,9 +411,9 @@ export default function StudentReportView({
                                                 <p className="text-xs text-slate-500">{item.desc}</p>
                                             </div>
                                             <span className={`text-xs font-bold px-2 py-1 rounded ${item.value === 'Independent' ? 'bg-green-100 text-green-700' :
-                                                    item.value?.includes('Partial') || item.value?.includes('Assistance') ? 'bg-amber-100 text-amber-700' :
-                                                        item.value === 'Dependent' ? 'bg-red-100 text-red-700' :
-                                                            'bg-slate-100 text-slate-500'
+                                                item.value?.includes('Partial') || item.value?.includes('Assistance') ? 'bg-amber-100 text-amber-700' :
+                                                    item.value === 'Dependent' ? 'bg-red-100 text-red-700' :
+                                                        'bg-slate-100 text-slate-500'
                                                 }`}>
                                                 {item.value || 'N/A'}
                                             </span>
@@ -421,8 +421,8 @@ export default function StudentReportView({
                                         <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full ${item.value === 'Independent' ? 'bg-green-500 w-full' :
-                                                        item.value?.includes('Partial') || item.value?.includes('Assistance') ? 'bg-amber-500 w-1/2' :
-                                                            item.value === 'Dependent' ? 'bg-red-500 w-1/4' : 'bg-slate-300 w-0'
+                                                    item.value?.includes('Partial') || item.value?.includes('Assistance') ? 'bg-amber-500 w-1/2' :
+                                                        item.value === 'Dependent' ? 'bg-red-500 w-1/4' : 'bg-slate-300 w-0'
                                                     }`}
                                             ></div>
                                         </div>

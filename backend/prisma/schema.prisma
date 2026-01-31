@@ -133,3 +133,15 @@ model ClinicalObservations {
   social_interaction      String?
   updated_at              DateTime  @updatedAt
 }
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  type        String    @default("meeting") // 'meeting', 'workshop', 'holiday'
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+

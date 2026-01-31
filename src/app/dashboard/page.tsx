@@ -4,37 +4,61 @@ import Accordion from "@/components/Accordion";
 import ReportList from "@/components/ReportList";
 import UploadReportForm from "@/components/UploadReportForm";
 import ProgressChart from "@/components/ProgressChart";
-import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines } from "react-icons/fa6";
+import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines, FaPlus } from "react-icons/fa6";
 import { getStudentProfile, getStudentById, getStudentClinicalHistory, getDevelopmentalMilestones, getDailyLivingSkills, getClinicalObservations } from "@/actions/student-actions";
 import { getStudentReports } from "@/actions/report-actions";
+import { getCenterStatsAction } from "@/actions/dashboard-actions";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import { cookies } from 'next/headers';
 import EditableSection from "@/components/EditableSection";
 import EditSectionButton from "@/components/EditSectionButton";
 import EditStudentProfileButton from "@/components/EditStudentProfileButton";
+import CenterDashboard from "@/components/CenterDashboard";
+import Link from "next/link";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { id?: string } }) {
-    // 1. Resolve Student ID based on Role
+    // 1. Resolve User and View Mode
     const userCookie = cookies().get('user')?.value;
     const user = userCookie ? JSON.parse(userCookie) : null;
+    const userRole = user?.role || 'parent';
 
     let studentIdToFetch = searchParams.id ? parseInt(searchParams.id) : null;
+    let isCenterView = false;
 
     // If parent, force their linked student
-    if (user?.role === 'parent' && user.linked_student_id) {
+    if (userRole === 'parent' && user.linked_student_id) {
         studentIdToFetch = user.linked_student_id;
+    } else if (!studentIdToFetch && (userRole === 'admin' || userRole === 'staff')) {
+        isCenterView = true;
     }
 
-    // 2. Fetch Student Data
-    let studentData;
-
-    if (studentIdToFetch) {
-        studentData = await getStudentById(studentIdToFetch);
-    } else {
-        // Default for staff/admin if no ID provided
-        studentData = await getStudentProfile('IPP-3211');
+    // 2. Handle Center View
+    if (isCenterView) {
+        const stats = await getCenterStatsAction();
+        return (
+            <PageContainer
+                title="Center Overview"
+                subtitle="Aggregated metrics and upcoming events"
+                action={
+                    userRole === 'admin' && (
+                        <Link
+                            href="/student-info"
+                            className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+                        >
+                            <FaPlus className="text-sm" />
+                            Add Student
+                        </Link>
+                    )
+                }
+            >
+                <CenterDashboard stats={stats} userRole={userRole} />
+            </PageContainer>
+        );
     }
+
+    // 3. Fetch Single Student Data
+    let studentData = studentIdToFetch ? await getStudentById(studentIdToFetch) : null;
 
     if (!studentData) {
         return (
@@ -76,8 +100,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         referral_doctor: studentData.referral_doctor || "N/A",
         active_status: studentData.active_status
     };
-
-    const userRole = user?.role || 'parent';
 
     // 1. Overview Content
     const OverviewContent = (

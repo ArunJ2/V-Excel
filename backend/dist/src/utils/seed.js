@@ -156,6 +156,40 @@ async function seed() {
             });
             console.log('✓ Clinical observations created');
         }
+        // 9. Create Sample Events
+        const existingEvents = await prisma.event.count();
+        if (existingEvents === 0) {
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            await prisma.event.createMany({
+                data: [
+                    {
+                        title: 'Parent-Teacher Meeting',
+                        description: 'Monthly progress review with parents',
+                        date: nextWeek,
+                        location: 'Main Hall',
+                        type: 'meeting'
+                    },
+                    {
+                        title: 'Sensory Integration Workshop',
+                        description: 'Training for staff and parents',
+                        date: new Date(nextWeek.getTime() + 86400000 * 2), // 2 days after PTM
+                        location: 'Occupational Therapy Wing',
+                        type: 'workshop'
+                    },
+                    {
+                        title: 'Annual Day Celebrations',
+                        description: 'Student cultural performances',
+                        date: nextMonth,
+                        location: 'V-Excel Main Campus',
+                        type: 'meeting'
+                    }
+                ]
+            });
+            console.log('✓ Sample events created');
+        }
         console.log('\n--------------------------------------------------');
         console.log('🎉 Seeding Complete!');
         console.log('--------------------------------------------------');

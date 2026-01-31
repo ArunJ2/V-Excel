@@ -5,6 +5,7 @@ import authRoutes from '../src/routes/authRoutes.js';
 import studentRoutes from '../src/routes/studentRoutes.js';
 import documentRoutes from '../src/routes/documentRoutes.js';
 import recordRoutes from '../src/routes/recordRoutes.js';
+import dashboardRoutes from '../src/routes/dashboardRoutes.js';
 import prisma from '../src/config/database.js';
 
 const app = express();
@@ -17,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/records', recordRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/health', async (req, res) => {
