@@ -62,6 +62,10 @@ export default function AddStudentForm() {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-slate-100">
                     <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Unique Student ID (UDID)</label>
+                        <input name="udid" required placeholder="Enter unique ID (e.g. VEX-001)" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all font-bold" />
+                    </div>
+                    <div className="space-y-1">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">IPP Number</label>
                         <input name="ipp_number" required placeholder="IPP-XXXX" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all font-medium" />
                     </div>

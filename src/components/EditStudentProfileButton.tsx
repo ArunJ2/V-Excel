@@ -30,6 +30,7 @@ const sectionConfig: Record<string, SectionConfig> = {
     personal_info: {
         title: 'Edit Personal Information',
         fields: [
+            { name: 'udid', label: 'Unique Student ID (UDID)', type: 'text' },
             { name: 'name', label: 'Full Name', type: 'text' },
             { name: 'dob', label: 'Date of Birth', type: 'date' },
             { name: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'] },
@@ -58,7 +59,8 @@ const sectionConfig: Record<string, SectionConfig> = {
     attendance: {
         title: 'Edit Attendance',
         fields: [
-            { name: 'attendance', label: 'Attendance Percentage', type: 'number', min: 0, max: 100 },
+            { name: 'days_present', label: 'Days Present', type: 'number', min: 0 },
+            { name: 'days_absent', label: 'Days Absent', type: 'number', min: 0 },
         ]
     },
     quick_notes: {
@@ -113,8 +115,11 @@ export default function EditStudentProfileButton({ studentId, section, currentDa
             if (dataToSubmit.active_status !== undefined) {
                 dataToSubmit.active_status = dataToSubmit.active_status === 'true';
             }
-            if (dataToSubmit.attendance !== undefined) {
-                dataToSubmit.attendance = parseInt(dataToSubmit.attendance);
+            if (dataToSubmit.days_present !== undefined) {
+                dataToSubmit.days_present = parseInt(dataToSubmit.days_present);
+            }
+            if (dataToSubmit.days_absent !== undefined) {
+                dataToSubmit.days_absent = parseInt(dataToSubmit.days_absent);
             }
 
             const result = await updateStudentProfile(studentId, dataToSubmit);

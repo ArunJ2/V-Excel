@@ -8,6 +8,7 @@ interface TabsContainerProps {
     developmentContent: React.ReactNode;
     clinicalContent: React.ReactNode;
     reportsContent: React.ReactNode;
+    userRole: string;
 }
 
 export default function TabsContainer({
@@ -15,7 +16,8 @@ export default function TabsContainer({
     historyContent,
     developmentContent,
     clinicalContent,
-    reportsContent
+    reportsContent,
+    userRole
 }: TabsContainerProps) {
     const [activeTab, setActiveTab] = useState("overview");
 
@@ -25,7 +27,10 @@ export default function TabsContainer({
         { id: "development", label: "Development" },
         { id: "clinical", label: "Clinical Observations" },
         { id: "reports", label: "Plans & Reports" },
-    ];
+    ].filter(tab => {
+        if (userRole === 'parent' && tab.id === 'reports') return false;
+        return true;
+    });
 
     return (
         <div>
@@ -36,8 +41,8 @@ export default function TabsContainer({
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`py-2 px-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap rounded-t-lg ${activeTab === tab.id
-                                    ? "border-brand-500 text-brand-500 bg-brand-50"
-                                    : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                                ? "border-brand-500 text-brand-500 bg-brand-50"
+                                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                                 }`}
                         >
                             {tab.label}

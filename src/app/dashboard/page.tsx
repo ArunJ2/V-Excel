@@ -480,24 +480,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             subtitle={`${studentData.center_name || 'V-Excel Foundation'}`}
             action={
                 <div className="flex items-center gap-2">
-                    {(userRole === 'admin' || userRole === 'staff') && studentData.public_link_token && (
-                        <a
-                            href={`/emergency/${studentData.public_link_token}`}
-                            target="_blank"
-                            className="flex items-center gap-2 px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg hover:bg-rose-100 transition-colors border border-rose-100"
-                            title="Public Emergency Link"
-                        >
-                            <FaLink className="text-sm" />
-                            Emergency
-                        </a>
+                    {(userRole === 'admin' || userRole === 'staff') && (
+                        <>
+                            {studentData.public_link_token && (
+                                <a
+                                    href={`/emergency/${studentData.public_link_token}`}
+                                    target="_blank"
+                                    className="flex items-center gap-2 px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg hover:bg-rose-100 transition-colors border border-rose-100"
+                                    title="Public Emergency Link"
+                                >
+                                    <FaLink className="text-sm" />
+                                    Emergency
+                                </a>
+                            )}
+                            <a
+                                href={`/reports/generate?id=${studentData.id}`}
+                                className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+                            >
+                                <FaFileLines className="text-sm" />
+                                Generate Report
+                            </a>
+                        </>
                     )}
-                    <a
-                        href={`/reports/generate?id=${studentData.id}`}
-                        className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
-                    >
-                        <FaFileLines className="text-sm" />
-                        Generate Report
-                    </a>
                 </div>
             }
         >
@@ -509,6 +513,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         developmentContent={DevelopmentContent}
                         clinicalContent={ClinicalContent}
                         reportsContent={ReportsContent}
+                        userRole={userRole}
                     />
                 </div>
             </div>

@@ -52,6 +52,7 @@ async function seed() {
         if (!student) {
             student = await prisma.student.create({
                 data: {
+                    udid: 'VEX-001',
                     ipp_number: 'IPP-3211',
                     name: 'Rahul S.',
                     dob: new Date('2015-05-20'),

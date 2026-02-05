@@ -53,10 +53,28 @@ export const getStudentByIPP = async (req, res) => {
     }
 };
 export const createStudent = async (req, res) => {
-    const { ipp_number, name, dob, gender, blood_group, height, weight, address, center_name, parent_names, parent_contact, parent_email, disability_type, disability_detail, clinical_case_no, therapist_assigned, referral_doctor, attendance, quick_notes } = req.body;
+    const { udid, ipp_number, name, dob, gender, blood_group, height, weight, address, center_name, parent_names, parent_contact, parent_email, disability_type, disability_detail, clinical_case_no, therapist_assigned, referral_doctor, days_present, days_absent, quick_notes } = req.body;
     try {
+        if (!udid) {
+            return res.status(400).json({ message: 'UDID is required' });
+        }
+        // Validate UDID uniqueness
+        const existingUdid = await prisma.student.findUnique({ where: { udid } });
+        if (existingUdid) {
+            return res.status(400).json({ message: 'UDID already exists. Please enter a unique UDID.' });
+        }
+        // Validate IPP uniqueness
+        const existingIpp = await prisma.student.findUnique({ where: { ipp_number } });
+        if (existingIpp) {
+            return res.status(400).json({ message: 'IPP Number already exists.' });
+        }
+        const dp = days_present ? parseInt(days_present) : 0;
+        const da = days_absent ? parseInt(days_absent) : 0;
+        const total = dp + da;
+        const attendancePercent = total > 0 ? Math.round((dp / total) * 100) : 100;
         const student = await prisma.student.create({
             data: {
+                udid,
                 ipp_number,
                 name,
                 dob: new Date(dob),
@@ -74,7 +92,10 @@ export const createStudent = async (req, res) => {
                 clinical_case_no,
                 therapist_assigned,
                 referral_doctor,
-                attendance: attendance ?? 100,
+                days_present: dp,
+                days_absent: da,
+                total_working_days: total,
+                attendance: attendancePercent,
                 quick_notes,
             }
         });
@@ -87,19 +108,26 @@ export const createStudent = async (req, res) => {
 export const updateStudent = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
+    const studentId = parseInt(id);
     try {
         if (data.dob)
             data.dob = new Date(data.dob);
+        // Validate UDID uniqueness if updated
+        if (data.udid) {
+            const existingUdid = await prisma.student.findUnique({ where: { udid: data.udid } });
+            if (existingUdid && existingUdid.id !== studentId) {
+                return res.status(400).json({ message: 'UDID already exists. Please enter a unique UDID.' });
+            }
+        }
         // Auto-calculate attendance if days are provided
         if (data.days_present !== undefined || data.days_absent !== undefined) {
             const currentStudent = await prisma.student.findUnique({
-                where: { id: parseInt(id) },
-                select: { days_present: true, days_absent: true, total_working_days: true }
+                where: { id: studentId },
+                select: { days_present: true, days_absent: true }
             });
-            const daysPresent = data.days_present ?? currentStudent?.days_present ?? 0;
-            const daysAbsent = data.days_absent ?? currentStudent?.days_absent ?? 0;
+            const daysPresent = data.days_present !== undefined ? parseInt(data.days_present) : (currentStudent?.days_present ?? 0);
+            const daysAbsent = data.days_absent !== undefined ? parseInt(data.days_absent) : (currentStudent?.days_absent ?? 0);
             const totalDays = daysPresent + daysAbsent;
-            // Update total working days
             data.total_working_days = totalDays;
             data.days_present = daysPresent;
             data.days_absent = daysAbsent;
@@ -108,11 +136,15 @@ export const updateStudent = async (req, res) => {
                 data.attendance = Math.round((daysPresent / totalDays) * 100);
             }
             else {
-                data.attendance = 100; // Default if no days entered
+                data.attendance = 100;
             }
         }
+        else {
+            // Ensure manual attendance percentage update is ignored
+            delete data.attendance;
+        }
         const student = await prisma.student.update({
-            where: { id: parseInt(id) },
+            where: { id: studentId },
             data: {
                 ...data,
                 updated_at: new Date()
