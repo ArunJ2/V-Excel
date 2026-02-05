@@ -126,11 +126,31 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         />
                     </div>
                 </div>
-                <div className="flex items-end gap-4">
+                <div className="flex items-end gap-4 mb-4">
                     <span className="text-5xl font-bold text-slate-800">{studentData.attendance ?? 100}%</span>
-                    <span className="text-sm text-slate-500 mb-2">Yearly Average</span>
+                    <span className="text-sm text-slate-500 mb-2">Attendance Rate</span>
                 </div>
-                <div className="w-full bg-slate-100 h-3 mt-4 rounded-full overflow-hidden">
+
+                {/* Days breakdown */}
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                        <p className="text-xs font-bold text-green-600 uppercase">Present</p>
+                        <p className="text-2xl font-bold text-green-700">{studentData.days_present ?? 0}</p>
+                        <p className="text-[10px] text-green-500">days</p>
+                    </div>
+                    <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                        <p className="text-xs font-bold text-red-600 uppercase">Absent</p>
+                        <p className="text-2xl font-bold text-red-700">{studentData.days_absent ?? 0}</p>
+                        <p className="text-[10px] text-red-500">days</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <p className="text-xs font-bold text-slate-600 uppercase">Total</p>
+                        <p className="text-2xl font-bold text-slate-700">{studentData.total_working_days ?? 0}</p>
+                        <p className="text-[10px] text-slate-500">working days</p>
+                    </div>
+                </div>
+
+                <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
                     <div
                         className={`h-full transition-all ${(studentData.attendance ?? 100) >= 75 ? 'bg-green-500' :
                             (studentData.attendance ?? 100) >= 50 ? 'bg-amber-500' :

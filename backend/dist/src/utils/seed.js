@@ -62,6 +62,11 @@ async function seed() {
                     parent_email: 'srinivasan@example.com',
                     disability_type: 'Autism Spectrum Disorder',
                     referral_doctor: 'Dr. Venkatesh (Child Psychologist)',
+                    // Attendance tracking
+                    days_present: 85,
+                    days_absent: 7,
+                    total_working_days: 92,
+                    attendance: 92, // 85/92 = 92%
                     active_status: true,
                 }
             });

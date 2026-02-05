@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  email             String    @unique
-  password_hash     String
-  name              String?
-  role              String    // 'admin', 'staff', 'parent'
-  linked_student_id Int?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  email               String    @unique
+  password_hash       String
+  name                String?
+  role                String    // 'admin', 'staff', 'parent'
+  linked_student_id   Int?
+  linked_student_udid String?   // UDID of linked student (required for parents)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
   
   uploads           Document[]
   record_versions   RecordVersion[]
@@ -41,7 +42,11 @@ model Student {
   clinical_case_no  String?   // Unique case identifier
   therapist_assigned String?  // Assigned therapist name
   referral_doctor   String?
-  attendance        Int       @default(100) // Attendance percentage (0-100)
+  // Attendance tracking
+  days_present      Int       @default(0)   // Number of days present
+  days_absent       Int       @default(0)   // Number of days absent
+  total_working_days Int      @default(0)   // Total working days
+  attendance        Int       @default(100) // Attendance percentage (0-100) - auto-calculated or manual
   quick_notes       String?   // Additional notes about the student
   active_status     Boolean   @default(true)
   public_link_token String    @unique @default(uuid()) // Secure token for public emergency dashboard
@@ -54,6 +59,7 @@ model Student {
   adl               DailyLivingSkills?
   observations      ClinicalObservations?
 }
+
 
 model Document {
   id                Int       @id @default(autoincrement())

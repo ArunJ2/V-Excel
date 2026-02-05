@@ -90,6 +90,27 @@ export const updateStudent = async (req, res) => {
     try {
         if (data.dob)
             data.dob = new Date(data.dob);
+        // Auto-calculate attendance if days are provided
+        if (data.days_present !== undefined || data.days_absent !== undefined) {
+            const currentStudent = await prisma.student.findUnique({
+                where: { id: parseInt(id) },
+                select: { days_present: true, days_absent: true, total_working_days: true }
+            });
+            const daysPresent = data.days_present ?? currentStudent?.days_present ?? 0;
+            const daysAbsent = data.days_absent ?? currentStudent?.days_absent ?? 0;
+            const totalDays = daysPresent + daysAbsent;
+            // Update total working days
+            data.total_working_days = totalDays;
+            data.days_present = daysPresent;
+            data.days_absent = daysAbsent;
+            // Calculate attendance percentage
+            if (totalDays > 0) {
+                data.attendance = Math.round((daysPresent / totalDays) * 100);
+            }
+            else {
+                data.attendance = 100; // Default if no days entered
+            }
+        }
         const student = await prisma.student.update({
             where: { id: parseInt(id) },
             data: {

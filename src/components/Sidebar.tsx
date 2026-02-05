@@ -40,9 +40,12 @@ export default function Sidebar({ name, role }: SidebarProps) {
                     </Link>
                 )}
 
-                <Link href="/reports" className={`flex-shrink-0 flex items-center px-4 py-3 rounded-xl font-medium border transition-all ${isActive('/reports') ? 'bg-brand-50 text-brand-700 border-brand-100' : 'text-slate-500 hover:bg-slate-50 border-transparent hover:text-slate-900'}`}>
-                    <FaFolderOpen className="w-5 text-center" /> <span className="ml-3">Reports</span>
-                </Link>
+                {/* Reports/Plans - Hidden for parent users */}
+                {role !== 'parent' && (
+                    <Link href="/reports" className={`flex-shrink-0 flex items-center px-4 py-3 rounded-xl font-medium border transition-all ${isActive('/reports') ? 'bg-brand-50 text-brand-700 border-brand-100' : 'text-slate-500 hover:bg-slate-50 border-transparent hover:text-slate-900'}`}>
+                        <FaFolderOpen className="w-5 text-center" /> <span className="ml-3">Reports</span>
+                    </Link>
+                )}
 
                 {role === 'admin' && (
                     <Link href="/admin" className={`flex-shrink-0 flex items-center px-4 py-3 rounded-xl font-medium border transition-all ${isActive('/admin') ? 'bg-brand-50 text-brand-700 border-brand-100' : 'text-slate-500 hover:bg-slate-50 border-transparent hover:text-slate-900'}`}>
@@ -50,6 +53,15 @@ export default function Sidebar({ name, role }: SidebarProps) {
                         <span className="ml-3">Admin Panel</span>
                     </Link>
                 )}
+
+                {/* Staff Edit Access Label */}
+                {role === 'staff' && (
+                    <div className="mt-4 mx-2 p-3 bg-brand-50 border border-brand-100 rounded-xl">
+                        <p className="text-[10px] font-bold text-brand-700 uppercase tracking-wider">Edit Access</p>
+                        <p className="text-[9px] text-brand-600 mt-0.5">Full editing permissions</p>
+                    </div>
+                )}
+
             </nav>
 
             <div className="p-4 border-t border-slate-100 hidden md:block">
