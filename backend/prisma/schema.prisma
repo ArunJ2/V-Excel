@@ -23,14 +23,19 @@ model User {
 
 model Student {
   id                Int       @id @default(autoincrement())
+  udid              String    @unique @default(uuid()) // System-generated unique identifier
   ipp_number        String    @unique
   name              String
   dob               DateTime
   gender            String?
   blood_group       String?
+  height            String?   // Height in cm
+  weight            String?   // Weight in kg
   address           String?
+  center_name       String?   @default("V-Excel Foundation") // Center/facility name
   parent_names      String?
   parent_contact    String?
+  parent_email      String?   // Parent/guardian email ID
   disability_type   String?
   disability_detail String?   // Specific details about disability
   clinical_case_no  String?   // Unique case identifier
@@ -39,6 +44,7 @@ model Student {
   attendance        Int       @default(100) // Attendance percentage (0-100)
   quick_notes       String?   // Additional notes about the student
   active_status     Boolean   @default(true)
+  public_link_token String    @unique @default(uuid()) // Secure token for public emergency dashboard
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 

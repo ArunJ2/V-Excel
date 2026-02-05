@@ -4,7 +4,7 @@ import PageTransition from './PageTransition';
 
 export default function PageContainer({ children, title, subtitle, action }: {
     children: React.ReactNode;
-    title: string;
+    title: React.ReactNode;
     subtitle?: string;
     action?: React.ReactNode;
 }) {

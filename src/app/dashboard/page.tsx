@@ -4,7 +4,7 @@ import Accordion from "@/components/Accordion";
 import ReportList from "@/components/ReportList";
 import UploadReportForm from "@/components/UploadReportForm";
 import ProgressChart from "@/components/ProgressChart";
-import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines, FaPlus } from "react-icons/fa6";
+import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines, FaPlus, FaLink, FaIdCard } from "react-icons/fa6";
 import { getStudentProfile, getStudentById, getStudentClinicalHistory, getDevelopmentalMilestones, getDailyLivingSkills, getClinicalObservations } from "@/actions/student-actions";
 import { getStudentReports } from "@/actions/report-actions";
 import { getCenterStatsAction } from "@/actions/dashboard-actions";
@@ -157,6 +157,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                             <span className="text-sm font-semibold text-slate-700">{studentData.name}</span>
                         </div>
                         <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">IPP Number</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.ipp_number}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Date of Birth</span>
                             <span className="text-sm font-semibold text-slate-700">{formattedDOB}</span>
                         </div>
@@ -167,6 +171,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Gender</span>
                             <span className="text-sm font-semibold text-slate-700">{studentData.gender || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Height</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.height ? `${studentData.height} cm` : 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Weight</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.weight ? `${studentData.weight} kg` : 'N/A'}</span>
                         </div>
                     </div>
                 </DataCard>
@@ -187,6 +199,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Contact</span>
                             <span className="text-sm font-semibold text-slate-700">{studentData.parent_contact || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-500">Email</span>
+                            <span className="text-sm font-semibold text-slate-700">{studentData.parent_email || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-slate-500">Address</span>
@@ -223,10 +239,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         </div>
                     </div>
                 </DataCard>
-            </div>
+            </div >
 
             {/* Progress Chart & Quick Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            < div className="grid grid-cols-1 md:grid-cols-2 gap-6" >
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <div>
@@ -257,8 +273,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         )}
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 
 
@@ -432,16 +448,37 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
     return (
         <PageContainer
-            title={studentData.name}
-            subtitle={`IPP Number: ${studentData.ipp_number}`}
+            title={
+                <span className="flex items-center gap-3">
+                    {studentData.name}
+                    <span className="text-sm font-normal text-slate-400 flex items-center gap-1">
+                        <FaIdCard className="text-brand-500" />
+                        {studentData.udid || 'Generating...'}
+                    </span>
+                </span>
+            }
+            subtitle={`${studentData.center_name || 'V-Excel Foundation'}`}
             action={
-                <a
-                    href={`/reports/generate?id=${studentData.id}`}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
-                >
-                    <FaFileLines className="text-sm" />
-                    Generate Report
-                </a>
+                <div className="flex items-center gap-2">
+                    {(userRole === 'admin' || userRole === 'staff') && studentData.public_link_token && (
+                        <a
+                            href={`/emergency/${studentData.public_link_token}`}
+                            target="_blank"
+                            className="flex items-center gap-2 px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg hover:bg-rose-100 transition-colors border border-rose-100"
+                            title="Public Emergency Link"
+                        >
+                            <FaLink className="text-sm" />
+                            Emergency
+                        </a>
+                    )}
+                    <a
+                        href={`/reports/generate?id=${studentData.id}`}
+                        className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+                    >
+                        <FaFileLines className="text-sm" />
+                        Generate Report
+                    </a>
+                </div>
             }
         >
             <div className="grid grid-cols-12 gap-6 pb-20">

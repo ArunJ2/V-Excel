@@ -6,6 +6,7 @@ import studentRoutes from '../src/routes/studentRoutes.js';
 import documentRoutes from '../src/routes/documentRoutes.js';
 import recordRoutes from '../src/routes/recordRoutes.js';
 import dashboardRoutes from '../src/routes/dashboardRoutes.js';
+import publicRoutes from '../src/routes/publicRoutes.js';
 import prisma from '../src/config/database.js';
 
 const app = express();
@@ -13,7 +14,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Public routes - NO authentication required
+app.use('/api/public', publicRoutes);
+
+// Protected routes - authentication required
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/documents', documentRoutes);
