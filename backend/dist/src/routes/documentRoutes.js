@@ -3,18 +3,12 @@ import multer from 'multer';
 import { uploadDocument, getStudentDocuments, getAllDocuments, generateReport, downloadDocument } from '../controllers/documentController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 const router = Router();
-// Multer setup for PDF storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.pdf');
-    }
-});
+// Multer setup - use memory storage for serverless (Vercel) compatibility
 const upload = multer({
-    storage,
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB max
+    },
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'application/pdf') {
             cb(null, true);

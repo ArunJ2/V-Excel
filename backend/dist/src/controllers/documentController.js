@@ -1,43 +1,27 @@
 import prisma from '../config/database.js';
-import { parsePDF } from '../utils/pdfParser.js';
-import path from 'path';
-import fs from 'fs';
 import PDFDocument from 'pdfkit';
 export const uploadDocument = async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
     const { student_id, type } = req.body;
-    const { filename, path: filePath } = req.file;
     try {
+        // Convert buffer to base64 for database storage (serverless compatible)
+        const fileBase64 = req.file.buffer.toString('base64');
+        const filename = `report-${Date.now()}-${Math.round(Math.random() * 1E9)}.pdf`;
         const document = await prisma.document.create({
             data: {
                 student_id: parseInt(student_id),
                 filename,
-                file_path: filePath,
+                file_path: `db://${filename}`, // Indicates stored in database
                 type,
                 uploaded_by: req.user.id,
-                status: 'pending'
+                status: 'processed',
+                file_data: fileBase64,
+                extracted_data: JSON.stringify({ summary: 'Document uploaded successfully.' })
             }
         });
-        try {
-            const extractedData = await parsePDF(filePath);
-            const updatedDoc = await prisma.document.update({
-                where: { id: document.id },
-                data: {
-                    status: 'processed',
-                    extracted_data: JSON.stringify(extractedData)
-                }
-            });
-            res.status(201).json(updatedDoc);
-        }
-        catch (parseErr) {
-            const errorDoc = await prisma.document.update({
-                where: { id: document.id },
-                data: { status: 'error' }
-            });
-            res.status(201).json(errorDoc);
-        }
+        res.status(201).json(document);
     }
     catch (err) {
         res.status(500).json({ message: err.message });
@@ -47,7 +31,19 @@ export const getAllDocuments = async (req, res) => {
     try {
         const documents = await prisma.document.findMany({
             orderBy: { created_at: 'desc' },
-            include: { student: { select: { name: true } } }
+            select: {
+                id: true,
+                student_id: true,
+                filename: true,
+                file_path: true,
+                type: true,
+                uploaded_by: true,
+                status: true,
+                extracted_data: true,
+                created_at: true,
+                updated_at: true,
+                student: { select: { name: true } }
+            }
         });
         res.json(documents);
     }
@@ -60,7 +56,19 @@ export const getStudentDocuments = async (req, res) => {
     try {
         const documents = await prisma.document.findMany({
             where: { student_id: parseInt(studentId) },
-            orderBy: { created_at: 'desc' }
+            orderBy: { created_at: 'desc' },
+            select: {
+                id: true,
+                student_id: true,
+                filename: true,
+                file_path: true,
+                type: true,
+                uploaded_by: true,
+                status: true,
+                extracted_data: true,
+                created_at: true,
+                updated_at: true,
+            }
         });
         res.json(documents);
     }
@@ -88,15 +96,14 @@ export const generateReport = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
         const filename = `${student.name.replace(/\s+/g, '_')}_${type}_Report_${Date.now()}.pdf`;
-        const filePath = path.join('uploads', filename);
-        // Ensure uploads directory exists
-        if (!fs.existsSync('uploads')) {
-            fs.mkdirSync('uploads', { recursive: true });
-        }
-        // Create PDF document
+        // Create PDF document in memory (serverless compatible)
         const doc = new PDFDocument({ margin: 50 });
-        const writeStream = fs.createWriteStream(filePath);
-        doc.pipe(writeStream);
+        const chunks = [];
+        doc.on('data', (chunk) => chunks.push(chunk));
+        const pdfPromise = new Promise((resolve, reject) => {
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+        });
         // Header
         doc.fontSize(24).fillColor('#0E4A67').text('V-Excel Student Report', { align: 'center' });
         doc.moveDown();
@@ -109,6 +116,7 @@ export const generateReport = async (req, res) => {
         doc.fontSize(11).fillColor('#333');
         doc.text(`Name: ${student.name}`);
         doc.text(`IPP Number: ${student.ipp_number}`);
+        doc.text(`UDID: ${student.udid}`);
         doc.text(`Date of Birth: ${student.dob.toLocaleDateString('en-GB')}`);
         doc.text(`Gender: ${student.gender || 'N/A'}`);
         doc.text(`Disability Type: ${student.disability_type || 'N/A'}`);
@@ -158,20 +166,19 @@ export const generateReport = async (req, res) => {
         // Footer
         doc.fontSize(9).fillColor('#999').text('This report was auto-generated by V-Excel Student Portal', { align: 'center' });
         doc.end();
-        // Wait for the PDF to be fully written
-        await new Promise((resolve, reject) => {
-            writeStream.on('finish', resolve);
-            writeStream.on('error', reject);
-        });
-        // Save to database
+        // Wait for PDF buffer
+        const pdfBuffer = await pdfPromise;
+        const fileBase64 = pdfBuffer.toString('base64');
+        // Save to database with base64 content
         const document = await prisma.document.create({
             data: {
                 student_id: parseInt(student_id),
                 filename: filename,
-                file_path: filePath,
+                file_path: `db://${filename}`,
                 type: type,
                 uploaded_by: req.user.id,
                 status: 'processed',
+                file_data: fileBase64,
                 extracted_data: JSON.stringify({ summary: `Auto-generated ${type} report for ${student.name}` })
             }
         });
@@ -191,29 +198,16 @@ export const downloadDocument = async (req, res) => {
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });
         }
-        // Handle both old mock paths and new real paths
-        let filePath;
-        if (document.file_path.startsWith('mock_path/')) {
-            // Old mock files don't exist
-            return res.status(404).json({ message: 'This is an old report. Please generate a new one.' });
+        // Serve from database (base64 stored in file_data)
+        if (document.file_data) {
+            const pdfBuffer = Buffer.from(document.file_data, 'base64');
+            res.setHeader('Content-Disposition', `attachment; filename="${document.filename}"`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Length', pdfBuffer.length.toString());
+            return res.send(pdfBuffer);
         }
-        else if (document.file_path.startsWith('uploads/')) {
-            // Resolve relative to current working directory
-            filePath = path.resolve(process.cwd(), document.file_path);
-        }
-        else {
-            // Absolute path or other
-            filePath = path.resolve(document.file_path);
-        }
-        console.log('Attempting to download from:', filePath);
-        if (!fs.existsSync(filePath)) {
-            console.log('File not found at:', filePath);
-            return res.status(404).json({ message: 'File not found on server' });
-        }
-        res.setHeader('Content-Disposition', `attachment; filename="${document.filename}"`);
-        res.setHeader('Content-Type', 'application/pdf');
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
+        // Fallback: old files stored on disk (legacy)
+        return res.status(404).json({ message: 'File data not available. Please re-upload or generate a new report.' });
     }
     catch (err) {
         console.error('Download error:', err);

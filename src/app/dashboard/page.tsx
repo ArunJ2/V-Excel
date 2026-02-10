@@ -7,7 +7,8 @@ import ProgressChart from "@/components/ProgressChart";
 import { FaUsers, FaBaby, FaNotesMedical, FaEye, FaBrain, FaComments, FaFaceSmile, FaFileLines, FaPlus, FaLink, FaIdCard } from "react-icons/fa6";
 import { getStudentProfile, getStudentById, getStudentClinicalHistory, getDevelopmentalMilestones, getDailyLivingSkills, getClinicalObservations } from "@/actions/student-actions";
 import { getStudentReports } from "@/actions/report-actions";
-import { getCenterStatsAction } from "@/actions/dashboard-actions";
+import { getCenterStatsAction, getUpcomingEventsAction } from "@/actions/dashboard-actions";
+import { FaCalendarDays, FaLocationDot, FaBullhorn } from "react-icons/fa6";
 import { notFound } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import { cookies } from 'next/headers';
@@ -298,14 +299,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     );
 
 
-    // 2. Fetch All Data in Parallel
-    const [historyData, milestonesData, adlData, observationsData, reportsData] = await Promise.all([
+    // 2. Fetch All Data in Parallel (including events for announcements)
+    const [historyData, milestonesData, adlData, observationsData, reportsData, eventsData] = await Promise.all([
         getStudentClinicalHistory(studentData.id),
         getDevelopmentalMilestones(studentData.id),
         getDailyLivingSkills(studentData.id),
         getClinicalObservations(studentData.id),
-        getStudentReports(studentData.id)
+        getStudentReports(studentData.id),
+        getUpcomingEventsAction()
     ]);
+
+    const upcomingEvents = Array.isArray(eventsData) ? eventsData : [];
 
     // Check if user can edit (admin or staff)
     const canEdit = user?.role === 'admin' || user?.role === 'staff';
@@ -516,6 +520,53 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                         userRole={userRole}
                     />
                 </div>
+
+                {/* Announcements & Upcoming Events - visible to ALL users including parents */}
+                {upcomingEvents.length > 0 && (
+                    <div className="col-span-12">
+                        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                                    <FaBullhorn />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800 tracking-tight">Announcements & Upcoming Events</h3>
+                                    <p className="text-xs text-slate-400">Stay updated with center activities</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {upcomingEvents.map((event: any) => (
+                                    <div key={event.id} className="group relative pl-4 border-l-4 border-brand-500 bg-slate-50 hover:bg-brand-50 p-4 rounded-r-xl transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="text-sm font-bold text-slate-800 group-hover:text-brand-600">{event.title}</h4>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${event.type === 'holiday' ? 'bg-rose-50 text-rose-600' :
+                                                    event.type === 'workshop' ? 'bg-amber-50 text-amber-600' :
+                                                        'bg-indigo-50 text-indigo-600'
+                                                }`}>
+                                                {event.type}
+                                            </span>
+                                        </div>
+                                        {event.description && (
+                                            <p className="text-xs text-slate-500 mb-2">{event.description}</p>
+                                        )}
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                                                <FaCalendarDays className="text-brand-500" />
+                                                {new Date(event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} at {new Date(event.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            {event.location && (
+                                                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                                                    <FaLocationDot className="text-brand-500" />
+                                                    {event.location}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </PageContainer >
     );

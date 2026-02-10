@@ -49,3 +49,12 @@ export async function deleteEventAction(id: number) {
         return { error: (error as Error).message };
     }
 }
+
+export async function getUpcomingEventsAction() {
+    try {
+        return await apiFetchServer('/dashboard/events');
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        return [];
+    }
+}

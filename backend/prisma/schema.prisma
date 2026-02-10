@@ -72,6 +72,7 @@ model Document {
   uploaded_by       Int
   status            String    @default("pending") // 'pending', 'processed', 'error'
   extracted_data    String?   // JSON string in SQLite
+  file_data         String?   // Base64-encoded PDF content for serverless storage
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
 }

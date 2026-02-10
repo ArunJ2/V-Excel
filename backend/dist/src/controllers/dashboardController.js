@@ -93,3 +93,23 @@ export const deleteEvent = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+// Accessible by ALL authenticated users (including parents)
+export const getUpcomingEvents = async (req, res) => {
+    try {
+        const upcomingEvents = await prisma.event.findMany({
+            where: {
+                date: {
+                    gte: new Date()
+                }
+            },
+            orderBy: {
+                date: 'asc'
+            },
+            take: 10
+        });
+        res.json(upcomingEvents);
+    }
+    catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
