@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { uploadDocument, getStudentDocuments, getAllDocuments, generateReport, downloadDocument } from '../controllers/documentController.js';
+import { uploadDocument, getStudentDocuments, getAllDocuments, generateReport, downloadDocument, previewDocument, deleteDocument } from '../controllers/documentController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
 const router = Router();
@@ -24,6 +24,8 @@ router.post('/upload', authenticate, authorize(['admin', 'staff']), upload.singl
 router.post('/generate', authenticate, authorize(['admin', 'staff']), generateReport);
 router.get('/all', authenticate, authorize(['admin', 'staff']), getAllDocuments);
 router.get('/download/:id', authenticate, downloadDocument);
+router.get('/preview/:id', authenticate, previewDocument);
 router.get('/student/:studentId', authenticate, getStudentDocuments);
+router.delete('/:id', authenticate, authorize(['admin', 'staff']), deleteDocument);
 
 export default router;

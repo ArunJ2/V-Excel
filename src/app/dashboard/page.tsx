@@ -16,6 +16,7 @@ import EditableSection from "@/components/EditableSection";
 import EditSectionButton from "@/components/EditSectionButton";
 import EditStudentProfileButton from "@/components/EditStudentProfileButton";
 import CenterDashboard from "@/components/CenterDashboard";
+import DeleteStudentButton from "@/components/DeleteStudentButton";
 import Link from "next/link";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { id?: string } }) {
@@ -465,7 +466,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             </div>
             <div>
                 <h3 className="text-xs font-bold text-slate-400 uppercase mb-4">Test Reports & Files</h3>
-                <ReportList reports={formattedReports} />
+                <ReportList reports={formattedReports} userRole={userRole} />
             </div>
         </div>
     );
@@ -506,6 +507,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                             </a>
                         </>
                     )}
+                    {userRole === 'admin' && (
+                        <DeleteStudentButton studentId={studentData.id} studentName={studentData.name} />
+                    )}
                 </div>
             }
         >
@@ -540,8 +544,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                                         <div className="flex justify-between items-start mb-2">
                                             <h4 className="text-sm font-bold text-slate-800 group-hover:text-brand-600">{event.title}</h4>
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${event.type === 'holiday' ? 'bg-rose-50 text-rose-600' :
-                                                    event.type === 'workshop' ? 'bg-amber-50 text-amber-600' :
-                                                        'bg-indigo-50 text-indigo-600'
+                                                event.type === 'workshop' ? 'bg-amber-50 text-amber-600' :
+                                                    'bg-indigo-50 text-indigo-600'
                                                 }`}>
                                                 {event.type}
                                             </span>

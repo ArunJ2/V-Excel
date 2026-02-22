@@ -240,3 +240,51 @@ export const downloadDocument = async (req: Request, res: Response) => {
         res.status(500).json({ message: (err as Error).message });
     }
 };
+
+export const previewDocument = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const document = await prisma.document.findUnique({
+            where: { id: parseInt(id as string) }
+        });
+
+        if (!document) {
+            return res.status(404).json({ message: 'Document not found' });
+        }
+
+        if (document.file_data) {
+            const pdfBuffer = Buffer.from(document.file_data, 'base64');
+            res.setHeader('Content-Disposition', `inline; filename="${document.filename}"`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Length', pdfBuffer.length.toString());
+            return res.send(pdfBuffer);
+        }
+
+        return res.status(404).json({ message: 'File data not available.' });
+    } catch (err) {
+        console.error('Preview error:', err);
+        res.status(500).json({ message: (err as Error).message });
+    }
+};
+
+export const deleteDocument = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const document = await prisma.document.findUnique({
+            where: { id: parseInt(id as string) }
+        });
+
+        if (!document) {
+            return res.status(404).json({ message: 'Document not found' });
+        }
+
+        await prisma.document.delete({
+            where: { id: parseInt(id as string) }
+        });
+
+        res.json({ message: 'Document deleted successfully' });
+    } catch (err) {
+        console.error('Delete document error:', err);
+        res.status(500).json({ message: (err as Error).message });
+    }
+};

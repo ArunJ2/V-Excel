@@ -34,8 +34,8 @@ export default function TabsContainer({
 
     return (
         <div>
-            <div className="border-b border-slate-200 mb-6 sticky top-0 bg-slate-50 z-20 pt-2 transition-all">
-                <nav className="flex space-x-1 md:space-x-2 overflow-x-auto no-scrollbar pb-1">
+            <div className="border-b border-slate-200 mb-6 sticky top-0 bg-white z-30 pt-2 pb-0 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all">
+                <nav className="flex space-x-1 md:space-x-2 overflow-x-auto no-scrollbar pb-1 px-1">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -51,7 +51,7 @@ export default function TabsContainer({
                 </nav>
             </div>
 
-            <div className="min-h-[400px]">
+            <div className="min-h-[400px] pt-1">
                 {activeTab === "overview" && <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">{overviewContent}</div>}
                 {activeTab === "background" && <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">{historyContent}</div>}
                 {activeTab === "development" && <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">{developmentContent}</div>}
