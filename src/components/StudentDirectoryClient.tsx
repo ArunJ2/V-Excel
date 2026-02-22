@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { FaArrowRight, FaSearch } from 'react-icons/fa6';
+import { FaArrowRight, FaMagnifyingGlass } from 'react-icons/fa6';
 
 interface Student {
     id: number;
@@ -12,7 +12,7 @@ interface Student {
     active_status: boolean;
 }
 
-export default function StudentDirectoryClient({ students }: { students: Student[] }) {
+export default function StudentDirectoryClient({ students = [] }: { students: Student[] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const [disabilityFilter, setDisabilityFilter] = useState('all');
@@ -49,7 +49,7 @@ export default function StudentDirectoryClient({ students }: { students: Student
             {/* Search & Filter Bar */}
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="relative flex-1">
-                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+                    <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
                     <input
                         type="text"
                         placeholder="Search by name, IPP, or disability..."

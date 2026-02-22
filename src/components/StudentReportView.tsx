@@ -1,7 +1,9 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { FaPrint, FaDownload, FaArrowLeft, FaUser, FaHospital, FaBaby, FaHouse, FaEye, FaChartLine } from 'react-icons/fa6';
+import { FaPrint, FaDownload, FaArrowLeft, FaUser, FaHospital, FaBaby, FaHouse, FaEye, FaChartLine, FaFilePdf, FaTrash, FaFloppyDisk } from 'react-icons/fa6';
+import { deleteDocumentAction, generateReportAction } from '@/actions/report-actions';
+import PdfPreviewModal from './PdfPreviewModal';
 import Link from 'next/link';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
@@ -50,6 +52,14 @@ export default function StudentReportView({
 }: StudentReportProps) {
     const reportRef = useRef<HTMLDivElement>(null);
     const [isPrinting, setIsPrinting] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [localReports, setLocalReports] = useState(reports || []);
+    const [previewReport, setPreviewReport] = useState<any | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [successMsg, setSuccessMsg] = useState('');
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
     const handlePrint = () => {
         setIsPrinting(true);
@@ -57,6 +67,32 @@ export default function StudentReportView({
             window.print();
             setIsPrinting(false);
         }, 100);
+    };
+
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        setSuccessMsg('');
+        const result = await generateReportAction(studentData.id, 'generated');
+        if (result.success && result.document) {
+            setLocalReports(prev => [result.document, ...prev]);
+            setSuccessMsg('Report generated and saved successfully!');
+            setTimeout(() => setSuccessMsg(''), 4000);
+        } else {
+            alert('Failed to generate report: ' + (result.error || 'Unknown error'));
+        }
+        setIsGenerating(false);
+    };
+
+    const handleDeleteReport = async (id: number) => {
+        setDeletingId(id);
+        const result = await deleteDocumentAction(id);
+        if (result.success) {
+            setLocalReports(prev => prev.filter(r => r.id !== id));
+        } else {
+            alert('Delete failed: ' + (result.error || 'Unknown error'));
+        }
+        setDeletingId(null);
+        setConfirmDeleteId(null);
     };
 
     // Format date helper
@@ -169,16 +205,87 @@ export default function StudentReportView({
                     </div>
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={handleGenerate}
+                            disabled={isGenerating}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                        >
+                            <FaFloppyDisk className="text-sm" />
+                            {isGenerating ? 'Generating...' : 'Generate & Save PDF'}
+                        </button>
+                        <button
                             onClick={handlePrint}
                             disabled={isPrinting}
                             className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50"
                         >
                             <FaPrint className="text-sm" />
-                            {isPrinting ? 'Preparing...' : 'Print / Save PDF'}
+                            {isPrinting ? 'Preparing...' : 'Print'}
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* Success Message */}
+            {successMsg && (
+                <div className="print:hidden max-w-[1200px] mx-auto px-6 mt-4">
+                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
+                        ✓ {successMsg}
+                    </div>
+                </div>
+            )}
+
+            {/* Existing Reports Section */}
+            {localReports.length > 0 && (
+                <div className="print:hidden max-w-[1200px] mx-auto px-6 mt-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Generated Reports ({localReports.length})</h3>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                            {localReports.map((report: any) => (
+                                <div key={report.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
+                                            <FaFilePdf />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-sm text-slate-800 truncate">{report.filename}</p>
+                                            <p className="text-xs text-slate-400">
+                                                {new Date(report.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 flex-shrink-0 ml-3">
+                                        <button
+                                            onClick={() => setPreviewReport(report)}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                            title="Preview"
+                                        >
+                                            <FaEye className="text-sm" />
+                                        </button>
+                                        <a
+                                            href={`${API_URL}/documents/download/${report.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                            title="Download"
+                                        >
+                                            <FaDownload className="text-sm" />
+                                        </a>
+                                        <button
+                                            onClick={() => setConfirmDeleteId(report.id)}
+                                            disabled={deletingId === report.id}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                                            title="Delete"
+                                        >
+                                            <FaTrash className="text-xs" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Report Content */}
             <div ref={reportRef} className="max-w-[1200px] mx-auto p-6 print:p-0 print:max-w-none print:w-full print:m-0 print:overflow-visible">
@@ -529,6 +636,44 @@ export default function StudentReportView({
                     </div>
                 </div>
             </div>
+
+            {/* Preview Modal */}
+            {previewReport && (
+                <PdfPreviewModal
+                    previewUrl={`${API_URL}/documents/preview/${previewReport.id}`}
+                    filename={previewReport.filename}
+                    downloadUrl={`${API_URL}/documents/download/${previewReport.id}`}
+                    onClose={() => setPreviewReport(null)}
+                />
+            )}
+
+            {/* Delete Confirmation */}
+            {confirmDeleteId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center print:hidden">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 z-10">
+                        <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Report</h3>
+                        <p className="text-sm text-slate-600 mb-6">
+                            Are you sure you want to delete this generated report? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setConfirmDeleteId(null)}
+                                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleDeleteReport(confirmDeleteId)}
+                                disabled={deletingId === confirmDeleteId}
+                                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                                {deletingId === confirmDeleteId ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Print Styles */}
             <style jsx global>{`

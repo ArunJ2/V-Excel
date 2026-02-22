@@ -23,3 +23,17 @@ export async function deleteDocumentAction(documentId: number) {
     }
 }
 
+export async function generateReportAction(studentId: number, type: string) {
+    try {
+        const result = await apiFetchServer('/documents/generate', {
+            method: 'POST',
+            body: JSON.stringify({ student_id: studentId, type }),
+        });
+        revalidatePath('/dashboard');
+        revalidatePath('/reports');
+        return { success: true, document: result };
+    } catch (error) {
+        return { error: (error as Error).message };
+    }
+}
+
