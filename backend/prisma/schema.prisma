@@ -48,6 +48,7 @@ model Student {
   total_working_days Int      @default(0)   // Total working days
   attendance        Int       @default(100) // Attendance percentage (0-100) - auto-calculated or manual
   quick_notes       String?   // Additional notes about the student
+  profile_picture   String?   // Base64-encoded profile picture (JPEG/PNG)
   active_status     Boolean   @default(true)
   public_link_token String    @unique @default(uuid()) // Secure token for public emergency dashboard
   created_at        DateTime  @default(now())

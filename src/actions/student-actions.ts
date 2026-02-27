@@ -94,3 +94,18 @@ export async function updateStudentProfile(studentId: number, data: any) {
     }
 }
 
+export async function uploadProfilePictureAction(studentId: number, formData: FormData) {
+    try {
+        const { apiFetchServer } = await import('@/lib/api-server');
+        const result = await apiFetchServer(`/students/${studentId}/profile-picture`, {
+            method: 'POST',
+            body: formData,
+        });
+        revalidatePath('/dashboard');
+        revalidatePath('/student-info');
+        return { success: true, profile_picture: result.profile_picture };
+    } catch (error) {
+        return { error: (error as Error).message };
+    }
+}
+

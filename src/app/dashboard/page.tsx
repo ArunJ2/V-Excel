@@ -17,6 +17,7 @@ import EditSectionButton from "@/components/EditSectionButton";
 import EditStudentProfileButton from "@/components/EditStudentProfileButton";
 import CenterDashboard from "@/components/CenterDashboard";
 import DeleteStudentButton from "@/components/DeleteStudentButton";
+import ProfilePicture from "@/components/ProfilePicture";
 import Link from "next/link";
 
 export default async function DashboardPage({ searchParams }: { searchParams: { id?: string } }) {
@@ -474,11 +475,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     return (
         <PageContainer
             title={
-                <span className="flex items-center gap-3">
-                    {studentData.name}
-                    <span className="text-sm font-normal text-slate-400 flex items-center gap-1">
-                        <FaIdCard className="text-brand-500" />
-                        {studentData.udid || 'Generating...'}
+                <span className="flex items-center gap-4">
+                    <ProfilePicture
+                        studentId={studentData.id}
+                        studentName={studentData.name}
+                        currentPicture={studentData.profile_picture}
+                        canEdit={userRole === 'admin' || userRole === 'staff'}
+                    />
+                    <span>
+                        <span className="block">{studentData.name}</span>
+                        <span className="text-sm font-normal text-slate-400 flex items-center gap-1">
+                            <FaIdCard className="text-brand-500" />
+                            {studentData.udid || 'Generating...'}
+                        </span>
                     </span>
                 </span>
             }

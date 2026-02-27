@@ -59,7 +59,6 @@ export default function StudentReportView({
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [successMsg, setSuccessMsg] = useState('');
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
     const handlePrint = () => {
         setIsPrinting(true);
@@ -263,7 +262,7 @@ export default function StudentReportView({
                                             <FaEye className="text-sm" />
                                         </button>
                                         <a
-                                            href={`${API_URL}/documents/download/${report.id}`}
+                                            href={`/api/documents/download/${report.id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
@@ -640,9 +639,9 @@ export default function StudentReportView({
             {/* Preview Modal */}
             {previewReport && (
                 <PdfPreviewModal
-                    previewUrl={`${API_URL}/documents/preview/${previewReport.id}`}
+                    previewUrl={`/api/documents/preview/${previewReport.id}`}
                     filename={previewReport.filename}
-                    downloadUrl={`${API_URL}/documents/download/${previewReport.id}`}
+                    downloadUrl={`/api/documents/download/${previewReport.id}`}
                     onClose={() => setPreviewReport(null)}
                 />
             )}

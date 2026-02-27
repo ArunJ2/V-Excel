@@ -36,8 +36,6 @@ export default function PdfPreviewModal({ previewUrl, filename, downloadUrl, onC
                     <div className="flex items-center gap-2">
                         <a
                             href={downloadUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors"
                         >
                             <FaDownload className="text-[10px]" /> Download

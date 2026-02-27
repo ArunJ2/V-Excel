@@ -16,8 +16,6 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
     const handleDelete = async (id: number) => {
         setDeletingId(id);
         const result = await deleteDocumentAction(id);
@@ -88,9 +86,7 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                             <FaEye className="text-sm" />
                                         </button>
                                         <a
-                                            href={`${API_URL}/documents/download/${report.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            href={`/api/documents/download/${report.id}`}
                                             className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
                                             title="Download"
                                         >
@@ -117,9 +113,9 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
             {/* Preview Modal */}
             {previewReport && (
                 <PdfPreviewModal
-                    previewUrl={`${API_URL}/documents/preview/${previewReport.id}`}
+                    previewUrl={`/api/documents/preview/${previewReport.id}`}
                     filename={previewReport.filename}
-                    downloadUrl={`${API_URL}/documents/download/${previewReport.id}`}
+                    downloadUrl={`/api/documents/download/${previewReport.id}`}
                     onClose={() => setPreviewReport(null)}
                 />
             )}

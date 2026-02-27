@@ -186,3 +186,24 @@ export const deleteStudent = async (req: Request, res: Response) => {
         res.status(500).json({ message: (err as Error).message });
     }
 };
+
+export const uploadProfilePicture = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No image file uploaded' });
+        }
+
+        const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+        const student = await prisma.student.update({
+            where: { id: parseInt(id as string) },
+            data: { profile_picture: base64Image }
+        });
+
+        res.json({ message: 'Profile picture updated', profile_picture: student.profile_picture });
+    } catch (err) {
+        res.status(500).json({ message: (err as Error).message });
+    }
+};
+
