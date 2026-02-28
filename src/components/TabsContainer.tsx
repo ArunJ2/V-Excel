@@ -40,7 +40,7 @@ export default function TabsContainer({
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`py-2 px-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap rounded-t-lg ${activeTab === tab.id
+                            className={`py-2 px-2.5 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap rounded-t-lg ${activeTab === tab.id
                                 ? "border-brand-500 text-brand-500 bg-brand-50"
                                 : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                                 }`}

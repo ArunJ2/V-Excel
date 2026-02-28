@@ -18,19 +18,23 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
 
     const handleDelete = async (id: number) => {
         setDeletingId(id);
-        const result = await deleteDocumentAction(id);
-        if (result.success) {
-            setReports(prev => prev.filter(r => r.id !== id));
-        } else {
-            alert('Delete failed: ' + (result.error || 'Unknown error'));
+        try {
+            const result = await deleteDocumentAction(id);
+            if (result.success) {
+                setReports(prev => prev.filter(r => r.id !== id));
+            } else {
+                alert('Delete failed: ' + (result.error || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Delete failed: Network error');
         }
         setDeletingId(null);
         setConfirmDeleteId(null);
     };
 
-    if (reports.length === 0) {
+    if (!reports || reports.length === 0) {
         return (
-            <div className="p-8 text-center text-slate-500">
+            <div className="p-6 sm:p-8 text-center text-slate-500">
                 No documents available.
             </div>
         );
@@ -38,37 +42,38 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
 
     return (
         <>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
-                            <th className="px-6 py-4">Document</th>
-                            <th className="px-6 py-4">Type</th>
-                            <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-4 lg:px-6 py-4">Document</th>
+                            <th className="px-4 lg:px-6 py-4">Type</th>
+                            <th className="px-4 lg:px-6 py-4">Date</th>
+                            <th className="px-4 lg:px-6 py-4">Status</th>
+                            <th className="px-4 lg:px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {reports.map((report: any) => (
                             <tr key={report.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-4">
+                                <td className="px-4 lg:px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded bg-brand-50 text-brand-600 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
                                             <FaFileLines />
                                         </div>
                                         <span className="font-semibold text-slate-700 truncate max-w-[200px]">{report.filename}</span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-4 lg:px-6 py-4">
                                     <span className="bg-slate-50 px-2 py-1 rounded text-[10px] uppercase font-bold tracking-tight border border-slate-100 text-slate-600">
                                         {report.type}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-slate-400 font-medium tracking-tight whitespace-nowrap">
+                                <td className="px-4 lg:px-6 py-4 text-slate-400 font-medium tracking-tight whitespace-nowrap">
                                     {new Date(report.created_at).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-4 lg:px-6 py-4">
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${report.status === 'processed' ? 'bg-green-100 text-green-700' :
                                         report.status === 'error' ? 'bg-red-100 text-red-700' :
                                             'bg-amber-100 text-amber-700'
@@ -76,18 +81,18 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                         {report.status?.toUpperCase()}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-4 lg:px-6 py-4">
                                     <div className="flex items-center gap-1 justify-end">
                                         <button
                                             onClick={() => setPreviewReport(report)}
-                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                                             title="Preview"
                                         >
                                             <FaEye className="text-sm" />
                                         </button>
                                         <a
                                             href={`/api/documents/download/${report.id}`}
-                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
                                             title="Download"
                                         >
                                             <FaDownload className="text-sm" />
@@ -96,7 +101,7 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                             <button
                                                 onClick={() => setConfirmDeleteId(report.id)}
                                                 disabled={deletingId === report.id}
-                                                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
                                                 title="Delete"
                                             >
                                                 <FaTrash className="text-xs" />
@@ -108,6 +113,59 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-slate-100">
+                {reports.map((report: any) => (
+                    <div key={report.id} className="p-4 space-y-3">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                                <FaFileLines className="text-lg" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-slate-700 text-sm truncate">{report.filename}</p>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    <span className="bg-slate-50 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-tight border border-slate-100 text-slate-600">
+                                        {report.type}
+                                    </span>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${report.status === 'processed' ? 'bg-green-100 text-green-700' :
+                                        report.status === 'error' ? 'bg-red-100 text-red-700' :
+                                            'bg-amber-100 text-amber-700'
+                                        }`}>
+                                        {report.status?.toUpperCase()}
+                                    </span>
+                                    <span className="text-[11px] text-slate-400">
+                                        {new Date(report.created_at).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pl-[52px]">
+                            <button
+                                onClick={() => setPreviewReport(report)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                            >
+                                <FaEye className="text-[10px]" /> Preview
+                            </button>
+                            <a
+                                href={`/api/documents/download/${report.id}`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors"
+                            >
+                                <FaDownload className="text-[10px]" /> Download
+                            </a>
+                            {(userRole === 'admin' || userRole === 'staff') && (
+                                <button
+                                    onClick={() => setConfirmDeleteId(report.id)}
+                                    disabled={deletingId === report.id}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                                >
+                                    <FaTrash className="text-[10px]" /> Delete
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {/* Preview Modal */}
@@ -122,9 +180,9 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
 
             {/* Delete Confirmation */}
             {confirmDeleteId && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setConfirmDeleteId(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 z-10">
+                    <div className="relative bg-white rounded-2xl shadow-2xl p-5 sm:p-6 max-w-sm w-full z-10">
                         <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Document</h3>
                         <p className="text-sm text-slate-600 mb-6">
                             Are you sure you want to delete this document? This action cannot be undone.

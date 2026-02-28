@@ -493,26 +493,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
             }
             subtitle={`${studentData.center_name || 'V-Excel Foundation'}`}
             action={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     {(userRole === 'admin' || userRole === 'staff') && (
                         <>
                             {studentData.public_link_token && (
                                 <a
                                     href={`/emergency/${studentData.public_link_token}`}
                                     target="_blank"
-                                    className="flex items-center gap-2 px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg hover:bg-rose-100 transition-colors border border-rose-100"
+                                    className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-rose-50 text-rose-600 font-bold text-xs sm:text-sm rounded-lg hover:bg-rose-100 transition-colors border border-rose-100"
                                     title="Public Emergency Link"
                                 >
-                                    <FaLink className="text-sm" />
-                                    Emergency
+                                    <FaLink className="text-xs" />
+                                    <span className="hidden sm:inline">Emergency</span>
                                 </a>
                             )}
                             <a
                                 href={`/reports/generate?id=${studentData.id}`}
-                                className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
+                                className="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-brand-600 text-white font-bold text-xs sm:text-sm rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-200"
                             >
-                                <FaFileLines className="text-sm" />
-                                Generate Report
+                                <FaFileLines className="text-xs" />
+                                <span className="hidden sm:inline">Generate</span> Report
                             </a>
                         </>
                     )}
@@ -522,7 +522,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                 </div>
             }
         >
-            <div className="grid grid-cols-12 gap-6 pb-20">
+            <div className="grid grid-cols-12 gap-4 sm:gap-6 pb-12 sm:pb-20">
                 <div className="col-span-12">
                     <TabsContainer
                         overviewContent={OverviewContent}

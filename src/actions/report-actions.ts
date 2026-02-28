@@ -19,7 +19,8 @@ export async function deleteDocumentAction(documentId: number) {
         revalidatePath('/reports');
         return { success: true };
     } catch (error) {
-        return { error: (error as Error).message };
+        console.error('Delete document error:', error);
+        return { success: false, error: (error as Error).message };
     }
 }
 
@@ -33,7 +34,7 @@ export async function generateReportAction(studentId: number, type: string) {
         revalidatePath('/reports');
         return { success: true, document: result };
     } catch (error) {
-        return { error: (error as Error).message };
+        console.error('Generate report error:', error);
+        return { success: false, error: (error as Error).message };
     }
 }
-
