@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FaFileLines, FaEye, FaTrash, FaDownload } from 'react-icons/fa6';
-import { deleteDocumentAction } from '@/actions/report-actions';
+import { deleteDocumentAction, getDocumentDataAction } from '@/actions/report-actions';
 import PdfPreviewModal from './PdfPreviewModal';
 
 interface ReportTableProps {
@@ -15,6 +15,7 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
     const [previewReport, setPreviewReport] = useState<any | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
     const handleDelete = async (id: number) => {
         setDeletingId(id);
@@ -30,6 +31,35 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
         }
         setDeletingId(null);
         setConfirmDeleteId(null);
+    };
+
+    const handleDownload = async (id: number, filename: string) => {
+        setDownloadingId(id);
+        try {
+            const result = await getDocumentDataAction(id);
+            if (result.success && result.data?.fileData) {
+                const byteChars = atob(result.data.fileData);
+                const byteNumbers = new Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteNumbers[i] = byteChars.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                alert('Download failed: ' + (result.error || 'File data not available'));
+            }
+        } catch (err) {
+            alert('Download failed: Network error');
+        }
+        setDownloadingId(null);
     };
 
     if (!reports || reports.length === 0) {
@@ -90,13 +120,14 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                         >
                                             <FaEye className="text-sm" />
                                         </button>
-                                        <a
-                                            href={`/api/doc/download/${report.id}`}
-                                            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                        <button
+                                            onClick={() => handleDownload(report.id, report.filename)}
+                                            disabled={downloadingId === report.id}
+                                            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors disabled:opacity-50"
                                             title="Download"
                                         >
                                             <FaDownload className="text-sm" />
-                                        </a>
+                                        </button>
                                         {(userRole === 'admin' || userRole === 'staff') && (
                                             <button
                                                 onClick={() => setConfirmDeleteId(report.id)}
@@ -148,12 +179,13 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                             >
                                 <FaEye className="text-[10px]" /> Preview
                             </button>
-                            <a
-                                href={`/api/doc/download/${report.id}`}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors"
+                            <button
+                                onClick={() => handleDownload(report.id, report.filename)}
+                                disabled={downloadingId === report.id}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-50"
                             >
-                                <FaDownload className="text-[10px]" /> Download
-                            </a>
+                                <FaDownload className="text-[10px]" /> {downloadingId === report.id ? 'Loading...' : 'Download'}
+                            </button>
                             {(userRole === 'admin' || userRole === 'staff') && (
                                 <button
                                     onClick={() => setConfirmDeleteId(report.id)}
@@ -171,9 +203,8 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
             {/* Preview Modal */}
             {previewReport && (
                 <PdfPreviewModal
-                    previewUrl={`/api/doc/preview/${previewReport.id}`}
+                    documentId={previewReport.id}
                     filename={previewReport.filename}
-                    downloadUrl={`/api/doc/download/${previewReport.id}`}
                     onClose={() => setPreviewReport(null)}
                 />
             )}

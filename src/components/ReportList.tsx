@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FaFilePdf } from 'react-icons/fa6';
 import { FaEye, FaTrash, FaDownload } from 'react-icons/fa';
-import { deleteDocumentAction } from '@/actions/report-actions';
+import { deleteDocumentAction, getDocumentDataAction } from '@/actions/report-actions';
 import PdfPreviewModal from './PdfPreviewModal';
 
 interface Report {
@@ -24,6 +24,7 @@ export default function ReportList({ reports, userRole }: ReportListProps) {
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [localReports, setLocalReports] = useState(reports);
+    const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
     const handleDelete = async (id: number) => {
         setDeletingId(id);
@@ -35,6 +36,35 @@ export default function ReportList({ reports, userRole }: ReportListProps) {
         }
         setDeletingId(null);
         setConfirmDeleteId(null);
+    };
+
+    const handleDownload = async (id: number, title: string) => {
+        setDownloadingId(id);
+        try {
+            const result = await getDocumentDataAction(id);
+            if (result.success && result.data?.fileData) {
+                const byteChars = atob(result.data.fileData);
+                const byteNumbers = new Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteNumbers[i] = byteChars.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = title.endsWith('.pdf') ? title : `${title}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                alert('Download failed: ' + (result.error || 'File not available'));
+            }
+        } catch (err) {
+            alert('Download failed: Network error');
+        }
+        setDownloadingId(null);
     };
 
     if (localReports.length === 0) {
@@ -71,13 +101,14 @@ export default function ReportList({ reports, userRole }: ReportListProps) {
                                 >
                                     <FaEye className="text-sm" />
                                 </button>
-                                <a
-                                    href={`/api/doc/download/${report.id}`}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                <button
+                                    onClick={() => handleDownload(report.id, report.title)}
+                                    disabled={downloadingId === report.id}
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors disabled:opacity-50"
                                     title="Download"
                                 >
                                     <FaDownload className="text-sm" />
-                                </a>
+                                </button>
                                 {(userRole === 'admin' || userRole === 'staff') && (
                                     <button
                                         onClick={() => setConfirmDeleteId(report.id)}
@@ -97,9 +128,8 @@ export default function ReportList({ reports, userRole }: ReportListProps) {
             {/* Preview Modal */}
             {previewReport && (
                 <PdfPreviewModal
-                    previewUrl={`/api/doc/preview/${previewReport.id}`}
+                    documentId={previewReport.id}
                     filename={previewReport.title}
-                    downloadUrl={`/api/doc/download/${previewReport.id}`}
                     onClose={() => setPreviewReport(null)}
                 />
             )}

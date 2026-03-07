@@ -267,6 +267,42 @@ export const previewDocument = async (req: Request, res: Response) => {
     }
 };
 
+export const getDocumentData = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const document = await prisma.document.findUnique({
+            where: { id: parseInt(id as string) },
+            select: {
+                id: true,
+                filename: true,
+                type: true,
+                status: true,
+                file_data: true,
+                created_at: true,
+            }
+        });
+
+        if (!document) {
+            return res.status(404).json({ message: 'Document not found' });
+        }
+
+        if (!document.file_data) {
+            return res.status(404).json({ message: 'File data not available.' });
+        }
+
+        res.json({
+            id: document.id,
+            filename: document.filename,
+            type: document.type,
+            fileData: document.file_data,
+            mimeType: 'application/pdf',
+        });
+    } catch (err) {
+        console.error('Get document data error:', err);
+        res.status(500).json({ message: (err as Error).message });
+    }
+};
+
 export const deleteDocument = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {

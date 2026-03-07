@@ -12,6 +12,16 @@ export async function getStudentReports(studentId: number) {
     }
 }
 
+export async function getDocumentDataAction(documentId: number) {
+    try {
+        const data = await apiFetchServer(`/documents/data/${documentId}`);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Get document data error:', error);
+        return { success: false, error: (error as Error).message };
+    }
+}
+
 export async function deleteDocumentAction(documentId: number) {
     try {
         await apiFetchServer(`/documents/${documentId}`, { method: 'DELETE' });
