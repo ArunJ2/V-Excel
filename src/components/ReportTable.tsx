@@ -91,7 +91,7 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                             <FaEye className="text-sm" />
                                         </button>
                                         <a
-                                            href={`/api/documents/download/${report.id}`}
+                                            href={`/api/doc/download/${report.id}`}
                                             className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:bg-green-50 hover:text-green-600 transition-colors"
                                             title="Download"
                                         >
@@ -149,7 +149,7 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
                                 <FaEye className="text-[10px]" /> Preview
                             </button>
                             <a
-                                href={`/api/documents/download/${report.id}`}
+                                href={`/api/doc/download/${report.id}`}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-green-600 bg-green-50 hover:bg-green-100 transition-colors"
                             >
                                 <FaDownload className="text-[10px]" /> Download
@@ -171,9 +171,9 @@ export default function ReportTable({ reports: initialReports, userRole }: Repor
             {/* Preview Modal */}
             {previewReport && (
                 <PdfPreviewModal
-                    previewUrl={`/api/documents/preview/${previewReport.id}`}
+                    previewUrl={`/api/doc/preview/${previewReport.id}`}
                     filename={previewReport.filename}
-                    downloadUrl={`/api/documents/download/${previewReport.id}`}
+                    downloadUrl={`/api/doc/download/${previewReport.id}`}
                     onClose={() => setPreviewReport(null)}
                 />
             )}

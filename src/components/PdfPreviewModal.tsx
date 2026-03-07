@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { FaTimes, FaDownload } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaTimes, FaDownload, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 
 interface PdfPreviewModalProps {
     previewUrl: string;
@@ -11,6 +11,9 @@ interface PdfPreviewModalProps {
 }
 
 export default function PdfPreviewModal({ previewUrl, filename, downloadUrl, onClose }: PdfPreviewModalProps) {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -22,6 +25,15 @@ export default function PdfPreviewModal({ previewUrl, filename, downloadUrl, onC
             document.body.style.overflow = '';
         };
     }, [onClose]);
+
+    const handleIframeLoad = () => {
+        setLoading(false);
+    };
+
+    const handleIframeError = () => {
+        setLoading(false);
+        setError('Failed to load document preview');
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
@@ -50,11 +62,39 @@ export default function PdfPreviewModal({ previewUrl, filename, downloadUrl, onC
                 </div>
 
                 {/* PDF Viewer */}
-                <div className="flex-1 bg-slate-100 min-h-0">
+                <div className="flex-1 bg-slate-100 min-h-0 relative">
+                    {/* Loading overlay */}
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
+                            <div className="flex flex-col items-center gap-3">
+                                <FaSpinner className="text-2xl text-brand-500 animate-spin" />
+                                <p className="text-sm text-slate-500 font-medium">Loading document...</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Error state */}
+                    {error && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
+                            <div className="flex flex-col items-center gap-3 text-center p-6">
+                                <FaExclamationTriangle className="text-3xl text-amber-500" />
+                                <p className="text-sm text-slate-700 font-medium">{error}</p>
+                                <a
+                                    href={downloadUrl}
+                                    className="mt-2 px-4 py-2 text-sm font-bold text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition-colors"
+                                >
+                                    Download Instead
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
                     <iframe
                         src={previewUrl}
                         className="w-full h-full border-0"
                         title={`Preview: ${filename}`}
+                        onLoad={handleIframeLoad}
+                        onError={handleIframeError}
                     />
                 </div>
             </div>

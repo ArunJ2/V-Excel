@@ -81,8 +81,6 @@ export const documentApi = {
     delete: (id: number) => apiFetchServer(`/documents/${id}`, {
         method: 'DELETE',
     }),
-    getPreviewUrl: (id: number) => {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-        return `${API_URL}/documents/preview/${id}`;
-    },
+    getPreviewUrl: (id: number) => `/api/doc/preview/${id}`,
+    getDownloadUrl: (id: number) => `/api/doc/download/${id}`,
 };
