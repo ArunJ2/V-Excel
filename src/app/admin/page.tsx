@@ -1,12 +1,13 @@
-import { authApi, studentApi } from "@/lib/api-server";
+import { getAllUsersAction } from "@/actions/user-actions";
+import { getAllStudents } from "@/actions/student-actions";
 import { FaUserPlus, FaUserShield, FaUserGroup } from "react-icons/fa6";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import UserActions from "@/components/UserActions";
 
 export default async function AdminPage() {
-    const users = await authApi.getAllUsers();
-    const students = await studentApi.getAll();
+    const users = await getAllUsersAction();
+    const students = await getAllStudents();
 
     const addBtn = (
         <Link href="/admin/add-user" className="px-4 py-2 bg-brand-600 text-white text-sm font-bold rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-2 shadow-sm">

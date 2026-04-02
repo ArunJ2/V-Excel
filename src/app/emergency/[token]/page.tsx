@@ -1,19 +1,23 @@
 import { notFound } from 'next/navigation';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import prisma from '@/lib/prisma';
 
 async function getEmergencyInfo(token: string) {
     try {
-        const res = await fetch(`${API_URL}/public/emergency/${token}`, {
-            cache: 'no-store'
+        const student = await prisma.student.findUnique({
+            where: { public_link_token: token },
+            select: {
+                name: true,
+                blood_group: true,
+                center_name: true,
+                address: true,
+                parent_contact: true,
+                parent_email: true,
+            }
         });
 
-        if (!res.ok) {
-            return null;
-        }
-
-        return res.json();
+        return student;
     } catch (error) {
+        console.error('Error fetching emergency info:', error);
         return null;
     }
 }

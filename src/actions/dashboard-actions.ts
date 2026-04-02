@@ -1,11 +1,52 @@
 'use server';
 
-import { apiFetchServer } from "@/lib/api-server";
-import { revalidatePath } from "next/cache";
+import prisma from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 export async function getCenterStatsAction() {
     try {
-        return await apiFetchServer('/dashboard/stats');
+        const totalStudents = await prisma.student.count();
+        const activeStudents = await prisma.student.count({ where: { active_status: true } });
+
+        const allStudents = await prisma.student.findMany({
+            select: { attendance: true }
+        });
+
+        const avgAttendance = allStudents.length > 0
+            ? Math.round(allStudents.reduce((acc, s) => acc + s.attendance, 0) / allStudents.length)
+            : 0;
+
+        // Get count by disability type
+        const disabilityDist = await prisma.student.groupBy({
+            by: ['disability_type'],
+            _count: {
+                id: true
+            }
+        });
+
+        // Get upcoming events (next 5)
+        const upcomingEvents = await prisma.event.findMany({
+            where: {
+                date: {
+                    gte: new Date()
+                }
+            },
+            orderBy: {
+                date: 'asc'
+            },
+            take: 5
+        });
+
+        return {
+            totalStudents,
+            activeStudents,
+            avgAttendance,
+            disabilityDist: disabilityDist.map(d => ({
+                type: d.disability_type || 'Unspecified',
+                count: d._count.id
+            })),
+            upcomingEvents
+        };
     } catch (error) {
         console.error('Error fetching center stats:', error);
         return null;
@@ -14,12 +55,17 @@ export async function getCenterStatsAction() {
 
 export async function createEventAction(data: any) {
     try {
-        const res = await apiFetchServer('/dashboard/events', {
-            method: 'POST',
-            body: JSON.stringify(data)
+        const event = await prisma.event.create({
+            data: {
+                title: data.title,
+                description: data.description,
+                date: new Date(data.date),
+                location: data.location,
+                type: data.type
+            }
         });
         revalidatePath('/dashboard');
-        return res;
+        return event;
     } catch (error) {
         return { error: (error as Error).message };
     }
@@ -27,12 +73,18 @@ export async function createEventAction(data: any) {
 
 export async function updateEventAction(id: number, data: any) {
     try {
-        const res = await apiFetchServer(`/dashboard/events/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data)
+        const event = await prisma.event.update({
+            where: { id },
+            data: {
+                title: data.title,
+                description: data.description,
+                date: new Date(data.date),
+                location: data.location,
+                type: data.type
+            }
         });
         revalidatePath('/dashboard');
-        return res;
+        return event;
     } catch (error) {
         return { error: (error as Error).message };
     }
@@ -40,11 +92,11 @@ export async function updateEventAction(id: number, data: any) {
 
 export async function deleteEventAction(id: number) {
     try {
-        const res = await apiFetchServer(`/dashboard/events/${id}`, {
-            method: 'DELETE'
+        await prisma.event.delete({
+            where: { id }
         });
         revalidatePath('/dashboard');
-        return res;
+        return { success: true };
     } catch (error) {
         return { error: (error as Error).message };
     }
@@ -52,7 +104,17 @@ export async function deleteEventAction(id: number) {
 
 export async function getUpcomingEventsAction() {
     try {
-        return await apiFetchServer('/dashboard/events');
+        return await prisma.event.findMany({
+            where: {
+                date: {
+                    gte: new Date()
+                }
+            },
+            orderBy: {
+                date: 'asc'
+            },
+            take: 10
+        });
     } catch (error) {
         console.error('Error fetching events:', error);
         return [];

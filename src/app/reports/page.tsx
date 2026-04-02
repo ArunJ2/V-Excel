@@ -1,4 +1,4 @@
-import { apiFetchServer } from "@/lib/api-server";
+import prisma from "@/lib/prisma";
 import { FaFileLines } from "react-icons/fa6";
 import PageContainer from "@/components/PageContainer";
 import Link from "next/link";
@@ -16,9 +16,24 @@ export default async function ReportsPage() {
 
     try {
         if (userRole === 'admin' || userRole === 'staff') {
-            students = await apiFetchServer('/students') || [];
+            students = await prisma.student.findMany({ orderBy: { name: 'asc' } });
         }
-        reports = await apiFetchServer('/documents/all') || [];
+        reports = await prisma.document.findMany({
+            orderBy: { created_at: 'desc' },
+            select: {
+                id: true,
+                student_id: true,
+                filename: true,
+                file_path: true,
+                type: true,
+                uploaded_by: true,
+                status: true,
+                extracted_data: true,
+                created_at: true,
+                updated_at: true,
+                student: { select: { name: true } }
+            }
+        });
     } catch (e) {
         error = "Unable to load data. Please ensure you are logged in.";
     }
